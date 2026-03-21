@@ -100,6 +100,7 @@ export default function TabLayout() {
 
   return (
     <MaterialTopTabs
+      initialRouteName="index"
       tabBar={(props) => <CustomTabBar />}
       tabBarPosition="bottom"
       screenOptions={{

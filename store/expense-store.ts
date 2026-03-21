@@ -75,7 +75,6 @@ export const useExpenseStore = create<ExpenseState>((set, get) => ({
     const user = useAuthStore.getState().user;
     if (user) {
       const { error } = await supabase.from('Transactions').insert({
-        id: newExpense.id,
         user_id: user.id,
         amount: Math.round(newExpense.amount),
         category: newExpense.category,

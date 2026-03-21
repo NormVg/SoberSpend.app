@@ -101,15 +101,17 @@ function useWrappedData() {
 function SlideIntro({ data }: { data: ReturnType<typeof useWrappedData> }) {
   return (
     <View style={[slide.container, { backgroundColor: '#0A0A0A' }]}>
-      <View style={slide.shadowBlock} />
-      <View style={[slide.card, { backgroundColor: Colors.accent, borderColor: Colors.black }]}>
-        <Text style={slide.eyebrow}>✦ YOUR MONTH IN REVIEW ✦</Text>
-        <Text style={slide.heroNumber}>SPENDING{'\n'}WRAPPED</Text>
-        <Text style={slide.subtitle}>
-          Hey {data.userName || 'Stranger'}, here's the brutal truth about your money this month.
-        </Text>
-        <View style={slide.pill}>
-          <Text style={slide.pillText}>SWIPE TO SEE →</Text>
+      <View style={slide.stackWrapper}>
+        <View style={[slide.shadowBlock, { backgroundColor: Colors.white }]} />
+        <View style={[slide.card, { backgroundColor: Colors.accent, borderColor: Colors.black }]}>
+          <Text style={[slide.eyebrow, { color: 'rgba(0,0,0,0.5)' }]}>✦ YOUR MONTH IN REVIEW ✦</Text>
+          <Text style={[slide.heroNumber, { color: Colors.black }]}>SPENDING{`\n`}WRAPPED</Text>
+          <Text style={[slide.subtitle, { color: 'rgba(0,0,0,0.7)' }]}>
+            Hey {data.userName || 'Stranger'}, here's the brutal truth about your money this month.
+          </Text>
+          <View style={[slide.pill, { backgroundColor: Colors.black, borderColor: Colors.black }]}>
+            <Text style={[slide.pillText, { color: Colors.accent }]}>SWIPE TO SEE →</Text>
+          </View>
         </View>
       </View>
     </View>
@@ -119,24 +121,26 @@ function SlideIntro({ data }: { data: ReturnType<typeof useWrappedData> }) {
 function SlideWeekly({ data }: { data: ReturnType<typeof useWrappedData> }) {
   return (
     <View style={[slide.container, { backgroundColor: '#0A0A0A' }]}>
-      <View style={[slide.shadowBlock, { backgroundColor: Colors.yellow }]} />
-      <View style={[slide.card, { backgroundColor: '#1A1A1A', borderColor: Colors.yellow }]}>
-        <View style={slide.iconCircle}>
-          <Calendar size={36} color={Colors.yellow} strokeWidth={2.5} />
-        </View>
-        <Text style={slide.eyebrow}>THIS WEEK</Text>
-        <Text style={[slide.heroNumber, { color: Colors.yellow }]}>
-          {formatCurrency(data.weeklyTotal)}
-        </Text>
-        <Text style={[slide.subtitle, { color: Colors.textSecondary }]}>
-          that's{' '}
-          <Text style={{ color: Colors.yellow }}>
-            {formatCurrency(data.weeklyTotal / 7)} a day
+      <View style={slide.stackWrapper}>
+        <View style={[slide.shadowBlock, { backgroundColor: Colors.yellow }]} />
+        <View style={[slide.card, { backgroundColor: '#1A1A1A', borderColor: Colors.yellow }]}>
+          <View style={[slide.iconCircle, { borderColor: Colors.yellow }]}>
+            <Calendar size={36} color={Colors.yellow} strokeWidth={2.5} />
+          </View>
+          <Text style={slide.eyebrow}>THIS WEEK</Text>
+          <Text style={[slide.heroNumber, { color: Colors.yellow }]}>
+            {formatCurrency(data.weeklyTotal)}
           </Text>
-          {' '}on average.{data.weeklyTotal > 5000 ? ' Yikes.' : ' Not bad.'}
-        </Text>
-        <View style={[slide.pill, { backgroundColor: Colors.yellow }]}>
-          <Text style={[slide.pillText, { color: Colors.black }]}>7-DAY RECAP</Text>
+          <Text style={[slide.subtitle, { color: Colors.textSecondary }]}>
+            that's{' '}
+            <Text style={{ color: Colors.yellow }}>
+              {formatCurrency(data.weeklyTotal / 7)} a day
+            </Text>
+            {' '}on average.{data.weeklyTotal > 5000 ? ' Yikes.' : ' Not bad.'}
+          </Text>
+          <View style={[slide.pill, { backgroundColor: Colors.yellow, borderColor: Colors.black }]}>
+            <Text style={[slide.pillText, { color: Colors.black }]}>7-DAY RECAP</Text>
+          </View>
         </View>
       </View>
     </View>
@@ -148,32 +152,34 @@ function SlideMonthly({ data }: { data: ReturnType<typeof useWrappedData> }) {
   const accentColor = overBudget ? Colors.exceeded : '#A8E6CF';
   return (
     <View style={[slide.container, { backgroundColor: '#0A0A0A' }]}>
-      <View style={[slide.shadowBlock, { backgroundColor: accentColor }]} />
-      <View style={[slide.card, { backgroundColor: '#1A1A1A', borderColor: accentColor }]}>
-        <View style={slide.iconCircle}>
-          <TrendingUp size={36} color={accentColor} strokeWidth={2.5} />
+      <View style={slide.stackWrapper}>
+        <View style={[slide.shadowBlock, { backgroundColor: accentColor }]} />
+        <View style={[slide.card, { backgroundColor: '#1A1A1A', borderColor: accentColor }]}>
+          <View style={[slide.iconCircle, { borderColor: accentColor }]}>
+            <TrendingUp size={36} color={accentColor} strokeWidth={2.5} />
+          </View>
+          <Text style={slide.eyebrow}>THIS MONTH</Text>
+          <Text style={[slide.heroNumber, { color: accentColor }]}>
+            {data.spendPercent}%
+          </Text>
+          <Text style={[slide.statLabel, { color: Colors.textSecondary }]}>
+            OF BUDGET USED
+          </Text>
+          <Text style={[slide.subtitle, { color: Colors.textSecondary, marginTop: Spacing.sm }]}>
+            {formatCurrency(data.monthlyTotal)} spent out of {formatCurrency(data.monthlyBudget)}{' '}
+            across {data.txCount} transactions.
+          </Text>
+          {overBudget && (
+            <View style={[slide.pill, { backgroundColor: Colors.exceeded, borderColor: Colors.black }]}>
+              <Text style={[slide.pillText, { color: Colors.white }]}>OVER BUDGET 💀</Text>
+            </View>
+          )}
+          {!overBudget && (
+            <View style={[slide.pill, { backgroundColor: accentColor, borderColor: Colors.black }]}>
+              <Text style={[slide.pillText, { color: Colors.black }]}>WITHIN BUDGET ✓</Text>
+            </View>
+          )}
         </View>
-        <Text style={slide.eyebrow}>THIS MONTH</Text>
-        <Text style={[slide.heroNumber, { color: accentColor }]}>
-          {data.spendPercent}%
-        </Text>
-        <Text style={[slide.statLabel, { color: Colors.textSecondary }]}>
-          OF BUDGET USED
-        </Text>
-        <Text style={[slide.subtitle, { color: Colors.textSecondary, marginTop: Spacing.sm }]}>
-          {formatCurrency(data.monthlyTotal)} spent out of {formatCurrency(data.monthlyBudget)}{' '}
-          across {data.txCount} transactions.
-        </Text>
-        {overBudget && (
-          <View style={[slide.pill, { backgroundColor: Colors.exceeded }]}>
-            <Text style={[slide.pillText, { color: Colors.white }]}>OVER BUDGET 💀</Text>
-          </View>
-        )}
-        {!overBudget && (
-          <View style={[slide.pill, { backgroundColor: accentColor }]}>
-            <Text style={[slide.pillText, { color: Colors.black }]}>WITHIN BUDGET ✓</Text>
-          </View>
-        )}
       </View>
     </View>
   );
@@ -184,25 +190,27 @@ function SlideTopCategory({ data }: { data: ReturnType<typeof useWrappedData> })
   const color = cat?.color ?? Colors.accent;
   return (
     <View style={[slide.container, { backgroundColor: '#0A0A0A' }]}>
-      <View style={[slide.shadowBlock, { backgroundColor: color }]} />
-      <View style={[slide.card, { backgroundColor: '#1A1A1A', borderColor: color }]}>
-        <View style={slide.iconCircle}>
-          <ShoppingBag size={36} color={color} strokeWidth={2.5} />
-        </View>
-        <Text style={slide.eyebrow}>YOUR BIGGEST DRAIN</Text>
-        <Text style={[slide.heroNumber, { color }]}>
-          {cat?.name.toUpperCase() ?? 'N/A'}
-        </Text>
-        <Text style={[slide.statLabel, { color: Colors.textSecondary }]}>
-          {formatCurrency(data.topCatAmount)} THIS MONTH
-        </Text>
-        <Text style={[slide.subtitle, { color: Colors.textSecondary, marginTop: Spacing.sm }]}>
-          {cat
-            ? `Most of your money vaporized into ${cat.name.toLowerCase()}. Budget was ${formatCurrency(cat.budgetLimit)}.`
-            : 'No transactions logged yet.'}
-        </Text>
-        <View style={[slide.pill, { backgroundColor: color }]}>
-          <Text style={[slide.pillText, { color: Colors.black }]}>CATEGORY KING 👑</Text>
+      <View style={slide.stackWrapper}>
+        <View style={[slide.shadowBlock, { backgroundColor: color }]} />
+        <View style={[slide.card, { backgroundColor: '#1A1A1A', borderColor: color }]}>
+          <View style={[slide.iconCircle, { borderColor: color }]}>
+            <ShoppingBag size={36} color={color} strokeWidth={2.5} />
+          </View>
+          <Text style={slide.eyebrow}>YOUR BIGGEST DRAIN</Text>
+          <Text style={[slide.heroNumber, { color }]}>
+            {cat?.name.toUpperCase() ?? 'N/A'}
+          </Text>
+          <Text style={[slide.statLabel, { color: Colors.textSecondary }]}>
+            {formatCurrency(data.topCatAmount)} THIS MONTH
+          </Text>
+          <Text style={[slide.subtitle, { color: Colors.textSecondary, marginTop: Spacing.sm }]}>
+            {cat
+              ? `Most of your money vaporized into ${cat.name.toLowerCase()}. Budget was ${formatCurrency(cat.budgetLimit)}.`
+              : 'No transactions logged yet.'}
+          </Text>
+          <View style={[slide.pill, { backgroundColor: color, borderColor: Colors.black }]}>
+            <Text style={[slide.pillText, { color: Colors.black }]}>CATEGORY KING 👑</Text>
+          </View>
         </View>
       </View>
     </View>
@@ -212,26 +220,32 @@ function SlideTopCategory({ data }: { data: ReturnType<typeof useWrappedData> })
 function SlideRoast({ data, onDone }: { data: ReturnType<typeof useWrappedData>; onDone: () => void }) {
   const persona = data.financialPersonality ?? 'Balanced';
   const personaColor = persona === 'Saver' ? '#00FFFF' : persona === 'Spender' ? Colors.accent : '#DFFF00';
+  const textColor = persona === 'Spender' ? Colors.white : Colors.black;
   const PersonaIcon = persona === 'Saver' ? Snowflake : persona === 'Spender' ? Flame : Scale;
 
   return (
     <View style={[slide.container, { backgroundColor: '#0A0A0A' }]}>
-      <View style={[slide.shadowBlock, { backgroundColor: personaColor }]} />
-      <View style={[slide.card, { backgroundColor: '#111', borderColor: personaColor }]}>
-        <View style={[slide.iconCircle, { backgroundColor: personaColor }]}>
-          <PersonaIcon size={36} color={Colors.black} strokeWidth={2.5} />
+      <View style={slide.stackWrapper}>
+        <View style={[slide.shadowBlock, { backgroundColor: personaColor }]} />
+        <View style={[slide.card, { backgroundColor: '#111', borderColor: personaColor }]}>
+          <View style={[slide.iconCircle, { backgroundColor: personaColor, borderColor: Colors.black }]}>
+            <PersonaIcon size={36} color={Colors.black} strokeWidth={2.5} />
+          </View>
+          <Text style={slide.eyebrow}>THE ROAST 🔥</Text>
+          <Text style={[slide.roastText, { color: personaColor }]}>
+            "{data.roastLine}"
+          </Text>
+          <Text style={[slide.statLabel, { color: Colors.textMuted, marginTop: Spacing.md }]}>
+            — YOUR FINANCIAL PERSONALITY, THE {persona.toUpperCase()}
+          </Text>
+          <Pressable
+            style={[slide.doneBtn, { backgroundColor: personaColor, borderColor: Colors.black }]}
+            onPress={onDone}
+          >
+            <Text style={[slide.doneBtnText, { color: Colors.black }]}>CLOSE WRAPPED</Text>
+            <ChevronRight size={18} color={Colors.black} strokeWidth={3} />
+          </Pressable>
         </View>
-        <Text style={slide.eyebrow}>THE ROAST 🔥</Text>
-        <Text style={[slide.roastText, { color: personaColor }]}>
-          "{data.roastLine}"
-        </Text>
-        <Text style={[slide.statLabel, { color: Colors.textMuted, marginTop: Spacing.md }]}>
-          — YOUR FINANCIAL PERSONALITY, THE {persona.toUpperCase()}
-        </Text>
-        <Pressable style={[slide.doneBtn, { backgroundColor: personaColor, borderColor: Colors.black }]} onPress={onDone}>
-          <Text style={[slide.doneBtnText, { color: Colors.black }]}>CLOSE WRAPPED</Text>
-          <ChevronRight size={18} color={Colors.black} strokeWidth={3} />
-        </Pressable>
       </View>
     </View>
   );
@@ -352,11 +366,15 @@ const slide = StyleSheet.create({
     paddingHorizontal: Spacing.lg,
     justifyContent: 'center',
   },
+  stackWrapper: {
+    position: 'relative',
+  },
   shadowBlock: {
-    ...StyleSheet.absoluteFillObject,
-    marginHorizontal: Spacing.lg,
+    position: 'absolute',
     top: 6,
-    left: Spacing.lg + 6,
+    left: 6,
+    right: -6,
+    bottom: -6,
     borderRadius: Radii.lg,
     borderWidth: Borders.medium,
     borderColor: Colors.black,

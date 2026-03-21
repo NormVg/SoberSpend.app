@@ -222,42 +222,44 @@ function SlideRoast({ data, onDone }: { data: ReturnType<typeof useWrappedData>;
 
   return (
     <View style={roast.outer}>
-      {/* Hard danger shadow */}
-      <View style={roast.shadow} />
+      <View style={slide.stackWrapper}>
+        {/* Hard danger shadow, anchored relative to the card wrapper */}
+        <View style={roast.shadow} />
 
-      <View style={roast.card}>
-        {/* Warning stripe header */}
-        <View style={roast.stripe}>
-          <Text style={roast.stripeText}>WARNING — FINANCIAL VERDICT — WARNING</Text>
+        <View style={roast.card}>
+          {/* Warning stripe header */}
+          <View style={roast.stripe}>
+            <Text style={roast.stripeText}>WARNING — FINANCIAL VERDICT — WARNING</Text>
+          </View>
+
+          {/* Giant skull */}
+          <Text style={roast.skull}>☠</Text>
+
+          {/* Persona badge */}
+          <View style={roast.personaBadge}>
+            <PersonaIcon size={14} color={DANGER_RED} strokeWidth={3} />
+            <Text style={roast.personaLabel}>THE {persona.toUpperCase()}</Text>
+          </View>
+
+          {/* THE actual roast in huge type */}
+          <Text style={roast.roastQuote}>
+            {`"${data.roastLine}"`}
+          </Text>
+
+          {/* Attribution */}
+          <Text style={roast.attribution}>
+            — SOBER.SPEND FINANCIAL CRIMES UNIT
+          </Text>
+
+          {/* Bottom divider */}
+          <View style={roast.divider} />
+
+          {/* CTA */}
+          <Pressable style={roast.closeBtn} onPress={onDone}>
+            <Text style={roast.closeBtnText}>I ACCEPT MY FATE</Text>
+            <ChevronRight size={20} color={Colors.black} strokeWidth={3} />
+          </Pressable>
         </View>
-
-        {/* Giant skull */}
-        <Text style={roast.skull}>☠</Text>
-
-        {/* Persona badge */}
-        <View style={roast.personaBadge}>
-          <PersonaIcon size={14} color={DANGER_RED} strokeWidth={3} />
-          <Text style={roast.personaLabel}>THE {persona.toUpperCase()}</Text>
-        </View>
-
-        {/* THE actual roast in huge type */}
-        <Text style={roast.roastQuote}>
-          {`"${data.roastLine}"`}
-        </Text>
-
-        {/* Attribution */}
-        <Text style={roast.attribution}>
-          — SOBER.SPEND FINANCIAL CRIMES UNIT
-        </Text>
-
-        {/* Bottom divider */}
-        <View style={roast.divider} />
-
-        {/* CTA */}
-        <Pressable style={roast.closeBtn} onPress={onDone}>
-          <Text style={roast.closeBtnText}>I ACCEPT MY FATE</Text>
-          <ChevronRight size={20} color={Colors.black} strokeWidth={3} />
-        </Pressable>
       </View>
     </View>
   );
@@ -454,8 +456,8 @@ const roast = StyleSheet.create({
   shadow: {
     position: 'absolute',
     top: 6,
-    left: Spacing.lg + 6,
-    right: Spacing.lg - 6,
+    left: 6,
+    right: -6,
     bottom: -6,
     backgroundColor: DANGER_RED,
     borderRadius: Radii.lg,

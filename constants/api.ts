@@ -1,8 +1,8 @@
 
 // NOTE: You must replace these with your actual Supabase URL and Anon Key
 // from Supabase Dashboard -> Project Settings -> API
-export const SUPABASE_URL = 'YOUR_SUPABASE_URL';
-export const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+export const SUPABASE_URL = 'https://xhijaggafuxdsdwifbbs.supabase.co';
+export const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhoaWphZ2dhZnV4ZHNkd2lmYmJzIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NDA5MTQ1NCwiZXhwIjoyMDg5NjY3NDU0fQ.pbgsOer3QLMxnM1B6ziNYKzNIgy3tAwWd8nnd6lE9Vw';
 
 // Hosted backend URL:
 export const API_BASE_URL = 'https://sober-spend-backend.vercel.app';

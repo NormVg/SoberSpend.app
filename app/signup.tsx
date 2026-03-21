@@ -14,22 +14,18 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Borders, Colors, Fonts, FontSizes, Radii, Spacing } from '@/constants/theme';
 import { supabase } from '@/lib/supabase';
-import { useBudgetStore } from '@/store/budget-store';
 
 export default function SignupScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const setUserName = useBudgetStore((s) => s.setOnboardingData);
-
   const handleSignup = async () => {
-    if (!name || !email || !password) {
-      setError('All fields are required');
+    if (!email || !password) {
+      setError('Email and password are required');
       return;
     }
 
@@ -40,17 +36,9 @@ export default function SignupScreen() {
       const { data, error: signUpError } = await supabase.auth.signUp({
         email,
         password,
-        options: {
-          data: {
-            full_name: name,
-          },
-        },
       });
 
       if (signUpError) throw signUpError;
-
-      // Update local name state
-      setUserName({ userName: name });
 
       // If successful, take them to onboarding wizard
       if (data.session) {
@@ -82,18 +70,6 @@ export default function SignupScreen() {
               <Text style={styles.errorText}>{error}</Text>
             </View>
           ) : null}
-
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>FIRST NAME</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="What do we call you?"
-              placeholderTextColor={Colors.textMuted}
-              autoCorrect={false}
-              value={name}
-              onChangeText={setName}
-            />
-          </View>
 
           <View style={styles.inputGroup}>
             <Text style={styles.label}>EMAIL</Text>

@@ -11,34 +11,40 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  View
+  View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-const { width: SCREEN_W, height: SCREEN_H } = Dimensions.get('window');
+const { width: SCREEN_W } = Dimensions.get('window');
+const DANGER_RED = '#FF1A1A';
 
-// ─── Roast lines by persona ──────────────────────────────────────────────────
+// ─── Roast lines by persona ───────────────────────────────────────────────────
 const ROAST_LINES: Record<string, string[]> = {
   Spender: [
-    'Your wallet called. It filed for divorce.',
-    'Impressive. You treated your budget like a suggestion.',
-    'You didn\'t buy things this month. You adopted them. Permanently.',
-    'Financial advisors fear you.',
-    'You should donate yourself to science. Specifically, to study where money goes.',
+    "You didn't overspend. You committed financial arson.",
+    "Your bank statement reads like a trauma response.",
+    "Your 'treat yourself' became a subscription.",
+    "You are the reason emergency funds exist. You ARE the emergency.",
+    "Splurging is a choice. You made it 47 times this month.",
+    "You bought things that don't exist yet. Pre-orders. On credit.",
+    "Therapists call what you did retail catastrophizing.",
   ],
   Balanced: [
-    'Look at you, barely surviving on vibes and ambiguity.',
-    'You\'re not a Saver. You\'re not a Spender. You\'re just... confused.',
-    'The Switzerland of finances. Neutral. Unchallenging. Beige.',
-    'You spent exactly enough to feel guilty, but not enough to feel free.',
-    'Mediocrity, but make it financial.',
+    "Not broke. Not thriving. Just beige. Financially beige.",
+    "You spent enough to feel guilty. Not enough to feel alive.",
+    "You want to save but also want Zomato. So you got both. Neither well.",
+    "The bank sees you as financially meh. You are fine. Just fine.",
+    "Perfectly average. Financial gray area. Boring energy.",
+    "You are the human equivalent of a shrug.",
   ],
   Saver: [
-    'Relax. Money is meant to be spent. You don\'t get a trophy for dying rich.',
-    'You have ₹0 in fun spending. Your bank account is healthy. Your soul is not.',
-    'Congratulations, your savings account likes you. Nobody else does.',
-    'You\'re one spreadsheet away from becoming a meme.',
-    'Living like tomorrow never comes — because you\'re saving for a tomorrow that never gets enjoyed.',
+    "You have money. And zero stories to tell. Congratulations.",
+    "You screenshot your balance and send it to no one.",
+    "No one at your funeral will say he really lived.",
+    "Rich cemetery. That was the goal, right?",
+    "You could afford a life experience. You chose a fixed deposit.",
+    "Your idea of fun is watching savings go up by 17 rupees.",
+    "You watched 3 streaming services die waiting for a sale.",
   ],
 };
 
@@ -62,7 +68,6 @@ function useWrappedData() {
   const weeklyTotal = weeklyExpenses.reduce((s, e) => s + e.amount, 0);
   const monthlyTotal = monthlyExpenses.reduce((s, e) => s + e.amount, 0);
 
-  // top category this month
   const catTotals: Record<string, number> = {};
   for (const exp of monthlyExpenses) {
     catTotals[exp.category] = (catTotals[exp.category] ?? 0) + exp.amount;
@@ -72,10 +77,6 @@ function useWrappedData() {
   const topCatAmount = sortedCats[0]?.[1] ?? 0;
   const topCategory = categories.find((c) => c.id === topCatId);
 
-  const avgDailySpend = monthlyExpenses.length
-    ? monthlyTotal / Math.max(1, now.getDate())
-    : 0;
-
   const spendPercent = monthlyBudget > 0
     ? Math.min(100, Math.round((monthlyTotal / monthlyBudget) * 100))
     : 0;
@@ -84,7 +85,6 @@ function useWrappedData() {
     weeklyTotal,
     monthlyTotal,
     monthlyBudget,
-    avgDailySpend,
     spendPercent,
     topCategory,
     topCatAmount,
@@ -96,7 +96,7 @@ function useWrappedData() {
   };
 }
 
-// ─── Individual Slide Components ─────────────────────────────────────────────
+// ─── Slide Components ─────────────────────────────────────────────────────────
 
 function SlideIntro({ data }: { data: ReturnType<typeof useWrappedData> }) {
   return (
@@ -104,13 +104,13 @@ function SlideIntro({ data }: { data: ReturnType<typeof useWrappedData> }) {
       <View style={slide.stackWrapper}>
         <View style={[slide.shadowBlock, { backgroundColor: Colors.white }]} />
         <View style={[slide.card, { backgroundColor: Colors.accent, borderColor: Colors.black }]}>
-          <Text style={[slide.eyebrow, { color: 'rgba(0,0,0,0.5)' }]}>✦ YOUR MONTH IN REVIEW ✦</Text>
+          <Text style={[slide.eyebrow, { color: 'rgba(0,0,0,0.5)' }]}>YOUR MONTH IN REVIEW</Text>
           <Text style={[slide.heroNumber, { color: Colors.black }]}>SPENDING{`\n`}WRAPPED</Text>
           <Text style={[slide.subtitle, { color: 'rgba(0,0,0,0.7)' }]}>
-            Hey {data.userName || 'Stranger'}, here's the brutal truth about your money this month.
+            Hey {data.userName || 'Stranger'}, here is the brutal truth about your money this month.
           </Text>
           <View style={[slide.pill, { backgroundColor: Colors.black, borderColor: Colors.black }]}>
-            <Text style={[slide.pillText, { color: Colors.accent }]}>SWIPE TO SEE →</Text>
+            <Text style={[slide.pillText, { color: Colors.accent }]}>SWIPE TO SEE</Text>
           </View>
         </View>
       </View>
@@ -132,7 +132,7 @@ function SlideWeekly({ data }: { data: ReturnType<typeof useWrappedData> }) {
             {formatCurrency(data.weeklyTotal)}
           </Text>
           <Text style={[slide.subtitle, { color: Colors.textSecondary }]}>
-            that's{' '}
+            that is{' '}
             <Text style={{ color: Colors.yellow }}>
               {formatCurrency(data.weeklyTotal / 7)} a day
             </Text>
@@ -162,21 +162,19 @@ function SlideMonthly({ data }: { data: ReturnType<typeof useWrappedData> }) {
           <Text style={[slide.heroNumber, { color: accentColor }]}>
             {data.spendPercent}%
           </Text>
-          <Text style={[slide.statLabel, { color: Colors.textSecondary }]}>
-            OF BUDGET USED
-          </Text>
+          <Text style={[slide.statLabel, { color: Colors.textSecondary }]}>OF BUDGET USED</Text>
           <Text style={[slide.subtitle, { color: Colors.textSecondary, marginTop: Spacing.sm }]}>
             {formatCurrency(data.monthlyTotal)} spent out of {formatCurrency(data.monthlyBudget)}{' '}
             across {data.txCount} transactions.
           </Text>
           {overBudget && (
             <View style={[slide.pill, { backgroundColor: Colors.exceeded, borderColor: Colors.black }]}>
-              <Text style={[slide.pillText, { color: Colors.white }]}>OVER BUDGET 💀</Text>
+              <Text style={[slide.pillText, { color: Colors.white }]}>OVER BUDGET</Text>
             </View>
           )}
           {!overBudget && (
             <View style={[slide.pill, { backgroundColor: accentColor, borderColor: Colors.black }]}>
-              <Text style={[slide.pillText, { color: Colors.black }]}>WITHIN BUDGET ✓</Text>
+              <Text style={[slide.pillText, { color: Colors.black }]}>WITHIN BUDGET</Text>
             </View>
           )}
         </View>
@@ -209,7 +207,7 @@ function SlideTopCategory({ data }: { data: ReturnType<typeof useWrappedData> })
               : 'No transactions logged yet.'}
           </Text>
           <View style={[slide.pill, { backgroundColor: color, borderColor: Colors.black }]}>
-            <Text style={[slide.pillText, { color: Colors.black }]}>CATEGORY KING 👑</Text>
+            <Text style={[slide.pillText, { color: Colors.black }]}>CATEGORY KING</Text>
           </View>
         </View>
       </View>
@@ -217,41 +215,55 @@ function SlideTopCategory({ data }: { data: ReturnType<typeof useWrappedData> })
   );
 }
 
+// ─── Roast card — full danger red, aggressive ─────────────────────────────────
 function SlideRoast({ data, onDone }: { data: ReturnType<typeof useWrappedData>; onDone: () => void }) {
   const persona = data.financialPersonality ?? 'Balanced';
-  const personaColor = persona === 'Saver' ? '#00FFFF' : persona === 'Spender' ? Colors.accent : '#DFFF00';
-  const textColor = persona === 'Spender' ? Colors.white : Colors.black;
   const PersonaIcon = persona === 'Saver' ? Snowflake : persona === 'Spender' ? Flame : Scale;
 
   return (
-    <View style={[slide.container, { backgroundColor: '#0A0A0A' }]}>
-      <View style={slide.stackWrapper}>
-        <View style={[slide.shadowBlock, { backgroundColor: personaColor }]} />
-        <View style={[slide.card, { backgroundColor: '#111', borderColor: personaColor }]}>
-          <View style={[slide.iconCircle, { backgroundColor: personaColor, borderColor: Colors.black }]}>
-            <PersonaIcon size={36} color={Colors.black} strokeWidth={2.5} />
-          </View>
-          <Text style={slide.eyebrow}>THE ROAST 🔥</Text>
-          <Text style={[slide.roastText, { color: personaColor }]}>
-            "{data.roastLine}"
-          </Text>
-          <Text style={[slide.statLabel, { color: Colors.textMuted, marginTop: Spacing.md }]}>
-            — YOUR FINANCIAL PERSONALITY, THE {persona.toUpperCase()}
-          </Text>
-          <Pressable
-            style={[slide.doneBtn, { backgroundColor: personaColor, borderColor: Colors.black }]}
-            onPress={onDone}
-          >
-            <Text style={[slide.doneBtnText, { color: Colors.black }]}>CLOSE WRAPPED</Text>
-            <ChevronRight size={18} color={Colors.black} strokeWidth={3} />
-          </Pressable>
+    <View style={roast.outer}>
+      {/* Hard danger shadow */}
+      <View style={roast.shadow} />
+
+      <View style={roast.card}>
+        {/* Warning stripe header */}
+        <View style={roast.stripe}>
+          <Text style={roast.stripeText}>WARNING — FINANCIAL VERDICT — WARNING</Text>
         </View>
+
+        {/* Giant skull */}
+        <Text style={roast.skull}>☠</Text>
+
+        {/* Persona badge */}
+        <View style={roast.personaBadge}>
+          <PersonaIcon size={14} color={DANGER_RED} strokeWidth={3} />
+          <Text style={roast.personaLabel}>THE {persona.toUpperCase()}</Text>
+        </View>
+
+        {/* THE actual roast in huge type */}
+        <Text style={roast.roastQuote}>
+          {`"${data.roastLine}"`}
+        </Text>
+
+        {/* Attribution */}
+        <Text style={roast.attribution}>
+          — SOBER.SPEND FINANCIAL CRIMES UNIT
+        </Text>
+
+        {/* Bottom divider */}
+        <View style={roast.divider} />
+
+        {/* CTA */}
+        <Pressable style={roast.closeBtn} onPress={onDone}>
+          <Text style={roast.closeBtnText}>I ACCEPT MY FATE</Text>
+          <ChevronRight size={20} color={Colors.black} strokeWidth={3} />
+        </Pressable>
       </View>
     </View>
   );
 }
 
-// ─── Progress Bar ─────────────────────────────────────────────────────────────
+// ─── Progress Dots ────────────────────────────────────────────────────────────
 function ProgressDots({ total, current }: { total: number; current: number }) {
   return (
     <View style={progress.row}>
@@ -268,7 +280,7 @@ function ProgressDots({ total, current }: { total: number; current: number }) {
   );
 }
 
-// ─── Main Screen ─────────────────────────────────────────────────────────────
+// ─── Main Screen ──────────────────────────────────────────────────────────────
 export default function WrappedScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
@@ -300,12 +312,10 @@ export default function WrappedScreen() {
 
   return (
     <View style={[styles.root, { paddingTop: insets.top }]}>
-      {/* Progress */}
       <View style={[styles.header, { paddingTop: Spacing.sm }]}>
         <ProgressDots total={TOTAL} current={slideIndex} />
       </View>
 
-      {/* Slides */}
       <ScrollView
         ref={scrollRef}
         horizontal
@@ -326,7 +336,6 @@ export default function WrappedScreen() {
         ))}
       </ScrollView>
 
-      {/* Tap hint */}
       {slideIndex < TOTAL - 1 && (
         <View style={[styles.hintRow, { paddingBottom: insets.bottom + Spacing.md }]}>
           <Text style={styles.hintText}>TAP ANYWHERE TO ADVANCE</Text>
@@ -336,20 +345,11 @@ export default function WrappedScreen() {
   );
 }
 
-// ─── Styles ───────────────────────────────────────────────────────────────────
+// ─── Shared slide styles ──────────────────────────────────────────────────────
 const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-    backgroundColor: '#0A0A0A',
-  },
-  header: {
-    paddingHorizontal: Spacing.lg,
-    paddingBottom: Spacing.sm,
-  },
-  hintRow: {
-    alignItems: 'center',
-    paddingTop: Spacing.sm,
-  },
+  root: { flex: 1, backgroundColor: '#0A0A0A' },
+  header: { paddingHorizontal: Spacing.lg, paddingBottom: Spacing.sm },
+  hintRow: { alignItems: 'center', paddingTop: Spacing.sm },
   hintText: {
     fontFamily: Fonts.display,
     fontSize: FontSizes.xs,
@@ -358,7 +358,6 @@ const styles = StyleSheet.create({
   },
 });
 
-// Slide shared styles
 const slide = StyleSheet.create({
   container: {
     width: SCREEN_W,
@@ -366,9 +365,7 @@ const slide = StyleSheet.create({
     paddingHorizontal: Spacing.lg,
     justifyContent: 'center',
   },
-  stackWrapper: {
-    position: 'relative',
-  },
+  stackWrapper: { position: 'relative' },
   shadowBlock: {
     position: 'absolute',
     top: 6,
@@ -428,14 +425,6 @@ const slide = StyleSheet.create({
     lineHeight: 24,
     marginTop: Spacing.lg,
   },
-  roastText: {
-    fontFamily: Fonts.accent,
-    fontSize: 30,
-    textAlign: 'center',
-    lineHeight: 38,
-    marginTop: Spacing.sm,
-    paddingHorizontal: Spacing.sm,
-  },
   pill: {
     marginTop: Spacing.xl,
     backgroundColor: Colors.accent,
@@ -451,42 +440,121 @@ const slide = StyleSheet.create({
     color: Colors.white,
     letterSpacing: 2,
   },
-  doneBtn: {
+});
+
+// ─── ROAST card specific styles ───────────────────────────────────────────────
+const roast = StyleSheet.create({
+  outer: {
+    width: SCREEN_W,
+    flex: 1,
+    paddingHorizontal: Spacing.lg,
+    justifyContent: 'center',
+    backgroundColor: '#0A0A0A',
+  },
+  shadow: {
+    position: 'absolute',
+    top: 6,
+    left: Spacing.lg + 6,
+    right: Spacing.lg - 6,
+    bottom: -6,
+    backgroundColor: DANGER_RED,
+    borderRadius: Radii.lg,
+    borderWidth: Borders.medium,
+    borderColor: Colors.black,
+  },
+  card: {
+    backgroundColor: Colors.black,
+    borderWidth: 4,
+    borderColor: DANGER_RED,
+    borderRadius: Radii.lg,
+    overflow: 'hidden',
+    alignItems: 'center',
+  },
+  stripe: {
+    width: '100%',
+    backgroundColor: DANGER_RED,
+    paddingVertical: 10,
+    alignItems: 'center',
+  },
+  stripeText: {
+    fontFamily: Fonts.display,
+    fontSize: FontSizes.xs,
+    color: Colors.black,
+    letterSpacing: 2,
+    textAlign: 'center',
+  },
+  skull: {
+    fontSize: 80,
+    textAlign: 'center',
     marginTop: Spacing.xl,
+    marginBottom: Spacing.sm,
+  },
+  personaBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: '#1A0000',
+    borderWidth: 2,
+    borderColor: DANGER_RED,
+    borderRadius: Radii.pill,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: 5,
+    marginBottom: Spacing.lg,
+  },
+  personaLabel: {
+    fontFamily: Fonts.display,
+    fontSize: FontSizes.sm,
+    color: DANGER_RED,
+    letterSpacing: 3,
+  },
+  roastQuote: {
+    fontFamily: Fonts.display,
+    fontSize: 26,
+    color: Colors.white,
+    textAlign: 'center',
+    lineHeight: 34,
+    paddingHorizontal: Spacing.xl,
+    marginBottom: Spacing.lg,
+  },
+  attribution: {
+    fontFamily: Fonts.display,
+    fontSize: FontSizes.xs,
+    color: DANGER_RED,
+    letterSpacing: 2,
+    textAlign: 'center',
+    marginBottom: Spacing.lg,
+  },
+  divider: {
+    width: '90%',
+    height: 3,
+    backgroundColor: DANGER_RED,
+    marginBottom: Spacing.lg,
+  },
+  closeBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: Spacing.sm,
+    backgroundColor: DANGER_RED,
     paddingHorizontal: Spacing.xl,
     paddingVertical: Spacing.md,
     borderRadius: Radii.pill,
     borderWidth: Borders.thick,
+    borderColor: Colors.black,
+    marginBottom: Spacing.xl,
   },
-  doneBtnText: {
+  closeBtnText: {
     fontFamily: Fonts.display,
-    fontSize: FontSizes.md,
+    fontSize: FontSizes.lg,
+    color: Colors.black,
     letterSpacing: 2,
   },
 });
 
-// Progress bar styles
+// ─── Progress bar ─────────────────────────────────────────────────────────────
 const progress = StyleSheet.create({
-  row: {
-    flexDirection: 'row',
-    gap: 6,
-    justifyContent: 'center',
-  },
-  dot: {
-    height: 4,
-    flex: 1,
-    borderRadius: 2,
-  },
-  dotFilled: {
-    backgroundColor: Colors.accent,
-  },
-  dotActive: {
-    backgroundColor: Colors.white,
-  },
-  dotEmpty: {
-    backgroundColor: Colors.border,
-  },
+  row: { flexDirection: 'row', gap: 6, justifyContent: 'center' },
+  dot: { height: 4, flex: 1, borderRadius: 2 },
+  dotFilled: { backgroundColor: Colors.accent },
+  dotActive: { backgroundColor: Colors.white },
+  dotEmpty: { backgroundColor: Colors.border },
 });

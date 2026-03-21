@@ -5,7 +5,6 @@ import { SavingsGoalCard } from '@/components/insights/savings-goal-card';
 import { SpendingTrendsCard } from '@/components/insights/spending-trends-card';
 import { WarningBanner } from '@/components/insights/warning-banner';
 import { Colors, Fonts, FontSizes, Spacing } from '@/constants/theme';
-import { Bell } from 'lucide-react-native';
 import React from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -20,10 +19,10 @@ export default function InsightsScreen() {
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
-        {/* Header */}
         <View style={styles.header}>
-          <Text style={styles.headerTitle}>Sober.Spend</Text>
-          <Bell size={24} color={Colors.white} />
+          <Text style={styles.headerTitle}>
+            Sober.<Text style={{ color: '#00FFFF' }}>Insights</Text>
+          </Text>
         </View>
 
         <WarningBanner message="YOU'VE SPENT 30% MORE ON FOOD THIS WEEK COMPARED TO LAST." />
@@ -76,7 +75,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: Spacing.lg,
+    paddingTop: Spacing.md,
+    paddingBottom: Spacing.xs,
     marginBottom: Spacing.sm,
   },
   headerTitle: {

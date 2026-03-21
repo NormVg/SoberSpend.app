@@ -1,16 +1,15 @@
 import { SavingsGoalCard } from '@/components/insights/savings-goal-card';
-import { NeoButton } from '@/components/ui/neo-button';
-import { NeoCard } from '@/components/ui/neo-card';
-import { Borders, Colors, Fonts, FontSizes, Radii, Spacing } from '@/constants/theme';
+import { Colors, Fonts, FontSizes, Spacing } from '@/constants/theme';
 import { useBudgetStore } from '@/store/budget-store';
 import { useExpenseStore } from '@/store/expense-store';
 import { useWishlistStore } from '@/store/wishlist-store';
 import { currentMonthExpenses, daysToAfford, totalSpent } from '@/utils/budget-engine';
 import { formatCurrency } from '@/utils/format';
 import * as Haptics from 'expo-haptics';
-import { Car, Circle, CircleEllipsis, Film, ShoppingBag, Utensils, Zap } from 'lucide-react-native';
-import React, { useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { useRouter } from 'expo-router';
+import { Car, CircleEllipsis, Film, Plus, ShoppingBag, Utensils, Zap } from 'lucide-react-native';
+import React from 'react';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const iconMap: Record<string, any> = {
@@ -24,29 +23,15 @@ const iconMap: Record<string, any> = {
 
 export default function WishlistScreen() {
   const insets = useSafeAreaInsets();
-  const { items, addItem, removeItem } = useWishlistStore();
+  const router = useRouter();
+  const { items, removeItem } = useWishlistStore();
   const expenses = useExpenseStore((s) => s.expenses);
   const monthlyBudget = useBudgetStore((s) => s.monthlyBudget);
+  const monthlySavingsTarget = useBudgetStore((s) => s.monthlySavingsTarget);
   const categories = useBudgetStore((s) => s.categories);
-
-  const [name, setName] = useState('');
-  const [price, setPrice] = useState('');
-  const [categoryId, setCategoryId] = useState('');
-  const [showForm, setShowForm] = useState(false);
-  const [showCatDropdown, setShowCatDropdown] = useState(false);
 
   const monthExpenses = currentMonthExpenses(expenses);
   const spent = totalSpent(monthExpenses);
-
-  const handleAdd = () => {
-    if (!name.trim() || !price.trim() || !categoryId) return;
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    addItem(name.trim(), parseFloat(price), categoryId);
-    setName('');
-    setPrice('');
-    setCategoryId('');
-    setShowForm(false);
-  };
 
   const handleRemove = (id: string) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -59,27 +44,25 @@ export default function WishlistScreen() {
         style={styles.scroll}
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
-        keyboardShouldPersistTaps="handled"
       >
+        {/* Header */}
         <View style={styles.headerRow}>
-          <Text style={styles.title}>Wishlist</Text>
-          <NeoButton
-            title={showForm ? '✕' : '+'}
-            variant="outline"
-            size="sm"
-            onPress={() => setShowForm(!showForm)}
-            style={{ paddingHorizontal: Spacing.md }}
-          />
+          <View>
+            <Text style={styles.title}>
+              Sober.<Text style={{ color: '#DFFF00' }}>Goals</Text>
+            </Text>
+            <Text style={styles.subtitle}>{items.length} item{items.length !== 1 ? 's' : ''} tracked</Text>
+          </View>
         </View>
 
         {/* Wishlist Items */}
         {items.map((item, index) => {
-          const days = daysToAfford(item.price, monthlyBudget, spent);
+          const days = daysToAfford(item.price, monthlyBudget, spent, monthlySavingsTarget);
           const isEven = index % 2 === 0;
           const cardColor = isEven ? '#FF85A2' : '#DFFF00';
 
-          const savingsAvailable = Math.max(0, monthlyBudget - spent);
-          const progressPercent = Math.min(100, Math.round((savingsAvailable / item.price) * 100));
+          const savingsPerMonth = monthlySavingsTarget > 0 ? monthlySavingsTarget : Math.max(0, monthlyBudget - spent);
+          const progressPercent = Math.min(100, Math.round((savingsPerMonth / item.price) * 100));
 
           const itemCategory = categories.find(c => c.id === item.categoryId);
           const iconString = itemCategory ? itemCategory.icon : undefined;
@@ -90,7 +73,7 @@ export default function WishlistScreen() {
               title={item.name}
               price={formatCurrency(item.price)}
               daysLeft={days > 0 ? days : 0}
-              subtitle={days < 0 ? "CAN'T AFFORD AT CURRENT RATE" : "BASED ON CURRENT SPENDING"}
+              subtitle={days < 0 ? "CAN'T AFFORD AT CURRENT RATE" : "BASED ON SAVINGS TARGET"}
               color={cardColor}
               icon={iconString}
               progressPercent={progressPercent}
@@ -99,109 +82,28 @@ export default function WishlistScreen() {
           );
         })}
 
-        {items.length === 0 && !showForm && (
+        {/* Empty State */}
+        {items.length === 0 && (
           <View style={styles.emptyState}>
             <Text style={styles.emptyEmoji}>🎯</Text>
-            <Text style={styles.emptyText}>Your wishlist is empty</Text>
-            <Text style={styles.emptySubtext}>Add items to track savings goals</Text>
+            <Text style={styles.emptyText}>No goals yet</Text>
+            <Text style={styles.emptySubtext}>Tap + to add your first savings goal</Text>
           </View>
         )}
 
-        {/* Add Item Form (Moved to Bottom) */}
-        {showForm && (
-          <View style={{ marginTop: Spacing.xl }}>
-            <NeoCard color="#00FFFF" style={{ marginBottom: Spacing.sm }}>
-              <View style={styles.inputGroup}>
-                <Text style={[styles.inputLabel, { color: Colors.black }]}>Item Name</Text>
-                <TextInput
-                  style={[styles.input, { color: Colors.black, borderColor: Colors.black, backgroundColor: Colors.white }]}
-                  placeholder="e.g. AirPods Pro"
-                  placeholderTextColor={Colors.textMuted}
-                  value={name}
-                  onChangeText={setName}
-                />
-              </View>
-              <View style={styles.inputGroup}>
-                <Text style={[styles.inputLabel, { color: Colors.black }]}>Price (₹)</Text>
-                <TextInput
-                  style={[styles.input, { color: Colors.black, borderColor: Colors.black, backgroundColor: Colors.white }]}
-                  placeholder="0"
-                  placeholderTextColor={Colors.textMuted}
-                  value={price}
-                  onChangeText={setPrice}
-                  keyboardType="numeric"
-                />
-              </View>
-              <View style={styles.inputGroup}>
-                <Text style={[styles.inputLabel, { color: Colors.black }]}>Category</Text>
-                {/* Dropdown Trigger */}
-                <Pressable
-                  onPress={() => setShowCatDropdown(!showCatDropdown)}
-                  style={[styles.input, { borderColor: Colors.black, backgroundColor: Colors.white, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }]}
-                >
-                  {(() => {
-                    const selected = categories.find(c => c.id === categoryId);
-                    const LucideIcon = selected ? (iconMap[selected.icon] || Circle) : null;
-                    return selected ? (
-                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-                        {LucideIcon && <LucideIcon size={20} color={Colors.black} strokeWidth={2.5} />}
-                        <Text style={{ fontFamily: Fonts.display, fontSize: FontSizes.md, color: Colors.black }}>{selected.name}</Text>
-                      </View>
-                    ) : (
-                      <Text style={{ fontFamily: Fonts.display, fontSize: FontSizes.md, color: Colors.textMuted }}>Pick a category</Text>
-                    );
-                  })()}
-                  <Text style={{ fontFamily: Fonts.display, fontSize: 18, color: Colors.black }}>{showCatDropdown ? '▲' : '▼'}</Text>
-                </Pressable>
-
-                {/* Dropdown List */}
-                {showCatDropdown && (
-                  <View style={{ borderWidth: 3, borderColor: Colors.black, borderRadius: Radii.md, backgroundColor: Colors.white, overflow: 'hidden', marginTop: 4 }}>
-                    {categories.map((cat, i) => {
-                      const isSelected = categoryId === cat.id;
-                      const LucideIcon = iconMap[cat.icon] || Circle;
-                      return (
-                        <Pressable
-                          key={cat.id}
-                          onPress={() => {
-                            Haptics.selectionAsync();
-                            setCategoryId(cat.id);
-                            setShowCatDropdown(false);
-                          }}
-                          style={{
-                            flexDirection: 'row',
-                            alignItems: 'center',
-                            gap: 12,
-                            padding: 14,
-                            backgroundColor: isSelected ? Colors.black : Colors.white,
-                            borderTopWidth: i === 0 ? 0 : 2,
-                            borderColor: Colors.black,
-                          }}
-                        >
-                          <LucideIcon size={20} color={isSelected ? '#00FFFF' : Colors.black} strokeWidth={2.5} />
-                          <Text style={{ fontFamily: Fonts.display, fontSize: FontSizes.md, color: isSelected ? '#00FFFF' : Colors.black }}>{cat.name}</Text>
-                        </Pressable>
-                      );
-                    })}
-                  </View>
-                )}
-              </View>
-              <NeoButton
-                title="Add to Wishlist"
-                variant="primary"
-                size="md"
-                onPress={handleAdd}
-                disabled={!name.trim() || !price.trim() || !categoryId}
-                style={{ backgroundColor: Colors.black }}
-                textStyle={{ color: Colors.white }}
-              />
-            </NeoCard>
-          </View>
-        )}
-
-        {/* Bottom Spacer for Nav */}
         <View style={{ height: 130 }} />
       </ScrollView>
+
+      {/* Floating Add Button */}
+      <Pressable
+        style={[styles.fab, { bottom: insets.bottom + 100 }]}
+        onPress={() => {
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+          router.push('/add-goal');
+        }}
+      >
+        <Plus size={28} color={Colors.black} strokeWidth={3} />
+      </Pressable>
     </View>
   );
 }
@@ -220,7 +122,7 @@ const styles = StyleSheet.create({
   headerRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     paddingVertical: Spacing.lg,
   },
   title: {
@@ -229,32 +131,19 @@ const styles = StyleSheet.create({
     color: Colors.white,
     fontWeight: '700',
   },
-  inputGroup: {
-    marginBottom: Spacing.md,
-  },
-  inputLabel: {
+  subtitle: {
     fontFamily: Fonts.display,
     fontSize: FontSizes.sm,
-    color: Colors.textSecondary,
-    marginBottom: Spacing.xs,
-  },
-  input: {
-    borderWidth: Borders.thin,
-    borderColor: Colors.border,
-    borderRadius: Radii.sm,
-    backgroundColor: Colors.surfaceLight,
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.sm,
-    fontFamily: Fonts.display,
-    fontSize: FontSizes.lg,
-    color: Colors.white,
+    color: Colors.textMuted,
+    marginTop: 2,
   },
   emptyState: {
     alignItems: 'center',
     paddingVertical: Spacing.xxl,
+    marginTop: Spacing.xl,
   },
   emptyEmoji: {
-    fontSize: 48,
+    fontSize: 56,
     marginBottom: Spacing.md,
   },
   emptyText: {
@@ -268,5 +157,22 @@ const styles = StyleSheet.create({
     fontSize: FontSizes.md,
     color: Colors.textMuted,
     marginTop: Spacing.xs,
+  },
+  fab: {
+    position: 'absolute',
+    right: Spacing.xl,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: '#DFFF00',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 3,
+    borderColor: Colors.black,
+    shadowColor: Colors.black,
+    shadowOffset: { width: 4, height: 4 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 8,
   },
 });

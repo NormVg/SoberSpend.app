@@ -1,7 +1,7 @@
 import { BudgetImpact } from '@/components/decision/budget-impact';
 import { WarningBanner } from '@/components/decision/warning-banner';
 import { NeoButton } from '@/components/ui/neo-button';
-import { Colors, Fonts, FontSizes, Spacing } from '@/constants/theme';
+import { Colors, Fonts, FontSizes, Radii, Spacing } from '@/constants/theme';
 import { useBudgetStore } from '@/store/budget-store';
 import { useExpenseStore } from '@/store/expense-store';
 import { currentMonthExpenses } from '@/utils/budget-engine';
@@ -9,10 +9,15 @@ import { evaluateTransaction } from '@/utils/decision-engine';
 import { formatCurrency } from '@/utils/format';
 import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
-import { AlertTriangle, CheckCircle } from 'lucide-react-native';
-import React from 'react';
-import { Linking, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { AlertTriangle, Car, CheckCircle, CircleEllipsis, Film, ShoppingBag, Target, Utensils, Zap } from 'lucide-react-native';
+import React, { useState } from 'react';
+import { Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
+const iconMap: Record<string, any> = {
+  'utensils': Utensils, 'car': Car, 'shopping-bag': ShoppingBag,
+  'film': Film, 'zap': Zap, 'circle-ellipsis': CircleEllipsis,
+};
 
 export default function DecisionScreen() {
   const insets = useSafeAreaInsets();
@@ -23,7 +28,9 @@ export default function DecisionScreen() {
   const expenses = useExpenseStore((s) => s.expenses);
   const { monthlyBudget, categories, isDemoMode } = useBudgetStore();
 
-  // If no pending transaction, go back
+  // Allow overriding category when auto-detect returns 'other'
+  const [overrideCategoryId, setOverrideCategoryId] = useState<string | null>(null);
+
   if (!pendingTransaction) {
     return (
       <View style={[styles.container, { paddingTop: insets.top }]}>
@@ -35,11 +42,9 @@ export default function DecisionScreen() {
     );
   }
 
-  const category = categories.find((c) => c.id === pendingTransaction.category);
-  if (!category) {
-    router.back();
-    return null;
-  }
+  const effectiveCategoryId = overrideCategoryId || pendingTransaction.category;
+  const isUnknown = effectiveCategoryId === 'other' && !overrideCategoryId;
+  const category = categories.find((c) => c.id === effectiveCategoryId) || categories.find((c) => c.id === 'other') || categories[0];
 
   const monthExpenses = currentMonthExpenses(expenses);
   const decision = evaluateTransaction(
@@ -51,15 +56,20 @@ export default function DecisionScreen() {
   );
 
   const handlePay = () => {
+    if (isUnknown) return; // force category pick first
     Haptics.notificationAsync(
       decision.warningLevel === 'exceeded'
         ? Haptics.NotificationFeedbackType.Warning
         : Haptics.NotificationFeedbackType.Success
     );
+
+    // Update pending with the overridden category before confirming
+    if (overrideCategoryId) {
+      setPending({ ...pendingTransaction, category: overrideCategoryId });
+    }
     confirmPending();
 
     if (!isDemoMode && pendingTransaction) {
-      // Build the UPI deep link from the pending transaction and open it
       const upiUrl = `upi://pay?pa=merchant@upi&pn=${encodeURIComponent(pendingTransaction.merchant)}&am=${pendingTransaction.amount}&tn=${encodeURIComponent(pendingTransaction.note || pendingTransaction.merchant)}`;
       Linking.openURL(upiUrl).catch(() => { });
     }
@@ -94,44 +104,88 @@ export default function DecisionScreen() {
           )}
         </View>
 
-        {/* Budget Impact */}
-        <View style={{ marginBottom: Spacing.lg }}>
-          <BudgetImpact
-            category={category}
-            currentSpent={decision.currentSpent}
-            currentPercent={decision.currentPercent}
-            projectedSpent={decision.projectedSpent}
-            projectedPercent={decision.projectedPercent}
-          />
-        </View>
-
-        {/* Warning */}
-        <View style={{ marginBottom: Spacing.xl }}>
-          <WarningBanner
-            level={decision.warningLevel}
-            message={decision.warningMessage}
-          />
-        </View>
-
-        {/* Total Budget Impact */}
-        <View style={styles.totalImpact}>
-          <Text style={styles.totalLabel}>Total Monthly Budget</Text>
-          <Text style={styles.totalValue}>
-            {decision.totalCurrentPercent}% → {decision.totalProjectedPercent}%
+        {/* Category picker — always visible, pre-selected if known */}
+        <View style={styles.categorySection}>
+          <Text style={styles.categoryLabel}>
+            {isUnknown ? '⚠️  UNKNOWN CATEGORY — PICK ONE' : 'CATEGORY'}
           </Text>
+          <View style={styles.chipGrid}>
+            {categories.filter((c) => c.id !== 'other').map((cat) => {
+              const isSelected = effectiveCategoryId === cat.id;
+              const LucideIcon = iconMap[cat.icon] || Target;
+              return (
+                <Pressable
+                  key={cat.id}
+                  onPress={() => {
+                    Haptics.selectionAsync();
+                    setOverrideCategoryId(cat.id);
+                  }}
+                  style={[
+                    styles.chip,
+                    { borderColor: isSelected ? cat.color : Colors.border },
+                    isSelected && { backgroundColor: cat.color },
+                  ]}
+                >
+                  <LucideIcon
+                    size={14}
+                    color={isSelected ? Colors.black : Colors.textSecondary}
+                    strokeWidth={2.5}
+                  />
+                  <Text style={[
+                    styles.chipText,
+                    { color: isSelected ? Colors.black : Colors.textSecondary }
+                  ]}>
+                    {cat.name}
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </View>
         </View>
+
+        {/* Budget Impact — only when category is known */}
+        {!isUnknown && (
+          <>
+            <View style={{ marginBottom: Spacing.lg }}>
+              <BudgetImpact
+                category={category}
+                currentSpent={decision.currentSpent}
+                currentPercent={decision.currentPercent}
+                projectedSpent={decision.projectedSpent}
+                projectedPercent={decision.projectedPercent}
+              />
+            </View>
+
+            <View style={{ marginBottom: Spacing.xl }}>
+              <WarningBanner
+                level={decision.warningLevel}
+                message={decision.warningMessage}
+              />
+            </View>
+
+            <View style={styles.totalImpact}>
+              <Text style={styles.totalLabel}>Total Monthly Budget</Text>
+              <Text style={styles.totalValue}>
+                {decision.totalCurrentPercent}% → {decision.totalProjectedPercent}%
+              </Text>
+            </View>
+          </>
+        )}
       </ScrollView>
 
       {/* Action Buttons */}
       <View style={[styles.actions, { paddingBottom: insets.bottom + Spacing.md }]}>
         <NeoButton
-          title={decision.warningLevel === 'exceeded' ? 'Pay Anyway' : 'Pay'}
-          variant={decision.warningLevel === 'exceeded' ? 'danger' : 'primary'}
+          title={isUnknown ? 'SELECT A CATEGORY FIRST' : (decision.warningLevel === 'exceeded' ? 'Pay Anyway' : 'Pay')}
+          variant={isUnknown ? 'outline' : (decision.warningLevel === 'exceeded' ? 'danger' : 'primary')}
           size="lg"
           onPress={handlePay}
-          icon={decision.warningLevel === 'exceeded'
-            ? <AlertTriangle size={20} color="#DFFF00" strokeWidth={2.5} />
-            : <CheckCircle size={20} color={Colors.white} strokeWidth={2.5} />}
+          disabled={isUnknown}
+          icon={!isUnknown
+            ? (decision.warningLevel === 'exceeded'
+              ? <AlertTriangle size={20} color="#DFFF00" strokeWidth={2.5} />
+              : <CheckCircle size={20} color={Colors.white} strokeWidth={2.5} />)
+            : undefined}
         />
         <View style={{ height: Spacing.md }} />
         <NeoButton
@@ -146,81 +200,56 @@ export default function DecisionScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: Colors.bg,
-  },
-  scroll: {
-    flex: 1,
-  },
-  content: {
-    paddingHorizontal: Spacing.lg,
-  },
-  header: {
-    paddingVertical: Spacing.md,
-  },
+  container: { flex: 1, backgroundColor: Colors.bg },
+  scroll: { flex: 1 },
+  content: { paddingHorizontal: Spacing.lg },
+  header: { paddingVertical: Spacing.md },
   headerLabel: {
-    fontFamily: Fonts.display,
-    fontSize: FontSizes.md,
-    color: Colors.textSecondary,
-    textAlign: 'center',
+    fontFamily: Fonts.display, fontSize: FontSizes.md,
+    color: Colors.textSecondary, textAlign: 'center',
   },
-  amountSection: {
-    alignItems: 'center',
-    paddingVertical: Spacing.xl,
-  },
+  amountSection: { alignItems: 'center', paddingVertical: Spacing.xl },
   amount: {
-    fontFamily: Fonts.display,
-    fontSize: FontSizes.hero,
-    color: Colors.white,
-    fontWeight: '700',
+    fontFamily: Fonts.display, fontSize: FontSizes.hero,
+    color: Colors.white, fontWeight: '700',
   },
   merchant: {
-    fontFamily: Fonts.display,
-    fontSize: FontSizes.xl,
-    color: Colors.textSecondary,
-    marginTop: Spacing.xs,
+    fontFamily: Fonts.display, fontSize: FontSizes.xl,
+    color: Colors.textSecondary, marginTop: Spacing.xs,
   },
   note: {
-    fontFamily: Fonts.display,
-    fontSize: FontSizes.md,
-    color: Colors.textMuted,
-    marginTop: Spacing.xs,
+    fontFamily: Fonts.display, fontSize: FontSizes.md,
+    color: Colors.textMuted, marginTop: Spacing.xs,
   },
+  categorySection: { marginBottom: Spacing.xl },
+  categoryLabel: {
+    fontFamily: Fonts.display, fontSize: FontSizes.sm,
+    color: Colors.textMuted, letterSpacing: 2, marginBottom: Spacing.sm,
+  },
+  chipGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  chip: {
+    flexDirection: 'row', alignItems: 'center', gap: 6,
+    paddingHorizontal: 12, paddingVertical: 8,
+    borderWidth: 2, borderRadius: Radii.pill,
+  },
+  chipText: { fontFamily: Fonts.display, fontSize: FontSizes.sm },
   totalImpact: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: Spacing.md,
-    borderTopWidth: 1,
-    borderTopColor: Colors.border,
+    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
+    paddingVertical: Spacing.md, borderTopWidth: 1, borderTopColor: Colors.border,
   },
   totalLabel: {
-    fontFamily: Fonts.display,
-    fontSize: FontSizes.md,
-    color: Colors.textSecondary,
+    fontFamily: Fonts.display, fontSize: FontSizes.md, color: Colors.textSecondary,
   },
   totalValue: {
-    fontFamily: Fonts.display,
-    fontSize: FontSizes.lg,
-    color: Colors.white,
-    fontWeight: '700',
+    fontFamily: Fonts.display, fontSize: FontSizes.lg,
+    color: Colors.white, fontWeight: '700',
   },
   actions: {
-    paddingHorizontal: Spacing.lg,
-    paddingTop: Spacing.md,
-    borderTopWidth: Spacing.xs,
-    borderTopColor: Colors.border,
+    paddingHorizontal: Spacing.lg, paddingTop: Spacing.md,
+    borderTopWidth: 1, borderTopColor: Colors.border,
   },
-  emptyState: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: Spacing.lg,
-  },
+  emptyState: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: Spacing.lg },
   emptyText: {
-    fontFamily: Fonts.display,
-    fontSize: FontSizes.xl,
-    color: Colors.textSecondary,
+    fontFamily: Fonts.display, fontSize: FontSizes.xl, color: Colors.textSecondary,
   },
 });

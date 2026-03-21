@@ -65,13 +65,22 @@ export function dailyAverage(expenses: Expense[]): number {
 }
 
 /**
- * Estimate days needed to afford a given price based on daily savings rate.
+ * Estimate days needed to afford a given price based on savings rate.
+ * If savingsTarget is provided, uses that directly.
+ * Otherwise infers from daily spend vs daily budget.
  */
-export function daysToAfford(price: number, monthlyBudget: number, monthlySpent: number): number {
-  const now = new Date();
-  const dayOfMonth = now.getDate();
-  const dailySpend = dayOfMonth > 0 ? monthlySpent / dayOfMonth : 0;
-  const dailySavings = (monthlyBudget / 30) - dailySpend;
-  if (dailySavings <= 0) return -1; // Can't afford at current rate
+export function daysToAfford(price: number, monthlyBudget: number, monthlySpent: number, monthlySavingsTarget?: number): number {
+  let dailySavings: number;
+
+  if (monthlySavingsTarget && monthlySavingsTarget > 0) {
+    dailySavings = monthlySavingsTarget / 30;
+  } else {
+    const now = new Date();
+    const dayOfMonth = now.getDate();
+    const dailySpend = dayOfMonth > 0 ? monthlySpent / dayOfMonth : 0;
+    dailySavings = (monthlyBudget / 30) - dailySpend;
+  }
+
+  if (dailySavings <= 0) return -1;
   return Math.ceil(price / dailySavings);
 }

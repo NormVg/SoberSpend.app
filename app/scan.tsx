@@ -3,15 +3,19 @@ import { NeoCard } from '@/components/ui/neo-card';
 import { Borders, Colors, Fonts, FontSizes, Radii, Spacing } from '@/constants/theme';
 import { useBudgetStore } from '@/store/budget-store';
 import { useExpenseStore } from '@/store/expense-store';
-import { categorize } from '@/utils/categorize';
 import { parseUPIString, upiToPendingTransaction } from '@/utils/upi-parser';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
-import { QrCode, ScanLine } from 'lucide-react-native';
+import { Car, Circle, CircleEllipsis, Film, QrCode, ScanLine, ShoppingBag, Utensils, Zap } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
 import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
+const iconMap: Record<string, any> = {
+  'utensils': Utensils, 'car': Car, 'shopping-bag': ShoppingBag,
+  'film': Film, 'zap': Zap, 'circle-ellipsis': CircleEllipsis,
+};
 
 export default function ScanScreen() {
   const insets = useSafeAreaInsets();
@@ -23,13 +27,10 @@ export default function ScanScreen() {
   const [scanned, setScanned] = useState(false);
   const [isScannerOpen, setIsScannerOpen] = useState(true);
 
-  // Manual entry forms
   const [merchant, setMerchant] = useState('');
   const [amount, setAmount] = useState('');
   const [note, setNote] = useState('');
-
-  const detectedCategory = merchant ? categorize(merchant) : null;
-  const categoryObj = detectedCategory ? categories.find((c) => c.id === detectedCategory) : null;
+  const [categoryId, setCategoryId] = useState('');
 
   useEffect(() => {
     if (isScannerOpen && !permission?.granted) {
@@ -58,16 +59,13 @@ export default function ScanScreen() {
   };
 
   const handleProceed = () => {
-    if (!merchant.trim() || !amount.trim()) return;
-
-    const catId = categorize(merchant);
+    if (!merchant.trim() || !amount.trim() || !categoryId) return;
     setPending({
       merchant: merchant.trim(),
       amount: parseFloat(amount),
-      category: catId,
+      category: categoryId,
       note: note.trim() || undefined,
     });
-
     router.push('/decision');
   };
 
@@ -193,24 +191,28 @@ export default function ScanScreen() {
           />
         </View>
 
-        {categoryObj && (
-          <View style={[styles.categoryPill, { backgroundColor: categoryObj.color }]}>
-            <Text style={styles.categoryPillText}>
-              Category: {categoryObj.name}
-            </Text>
-          </View>
-        )}
-
         <View style={styles.inputGroup}>
-          <Text style={styles.inputLabel}>Amount (₹)</Text>
-          <TextInput
-            style={[styles.input, styles.amountInput]}
-            placeholder="0"
-            placeholderTextColor={Colors.textMuted}
-            value={amount}
-            onChangeText={setAmount}
-            keyboardType="numeric"
-          />
+          <Text style={styles.inputLabel}>Category</Text>
+          <View style={styles.chipGrid}>
+            {categories.filter(c => c.id !== 'other').map((cat) => {
+              const isSelected = categoryId === cat.id;
+              const LucideIcon = iconMap[cat.icon] || Circle;
+              return (
+                <Pressable
+                  key={cat.id}
+                  onPress={() => { Haptics.selectionAsync(); setCategoryId(cat.id); }}
+                  style={[
+                    styles.chip,
+                    { borderColor: isSelected ? cat.color : Colors.border },
+                    isSelected && { backgroundColor: cat.color },
+                  ]}
+                >
+                  <LucideIcon size={14} color={isSelected ? Colors.black : Colors.textSecondary} strokeWidth={2.5} />
+                  <Text style={[styles.chipText, { color: isSelected ? Colors.black : Colors.textSecondary }]}>{cat.name}</Text>
+                </Pressable>
+              );
+            })}
+          </View>
         </View>
 
         <View style={styles.inputGroup}>
@@ -231,7 +233,7 @@ export default function ScanScreen() {
             variant="primary"
             size="lg"
             onPress={handleProceed}
-            disabled={!merchant.trim() || !amount.trim()}
+            disabled={!merchant.trim() || !amount.trim() || !categoryId}
           />
         </View>
 
@@ -330,20 +332,24 @@ const styles = StyleSheet.create({
     fontSize: FontSizes.xxl,
     fontWeight: '700',
   },
-  categoryPill: {
-    alignSelf: 'flex-start',
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.xs,
-    borderRadius: Radii.pill,
-    borderWidth: Borders.thin,
-    borderColor: Colors.black,
-    marginBottom: Spacing.md,
+  chipGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginTop: Spacing.xs,
   },
-  categoryPillText: {
+  chip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderWidth: 2,
+    borderRadius: Radii.pill,
+  },
+  chipText: {
     fontFamily: Fonts.display,
     fontSize: FontSizes.sm,
-    color: Colors.black,
-    fontWeight: '700',
   },
 
   // Camera Overlay Styles

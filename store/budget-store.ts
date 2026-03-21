@@ -4,10 +4,12 @@ import { create } from 'zustand';
 
 interface BudgetState {
   monthlyBudget: number;
+  monthlySavingsTarget: number;
   categories: Category[];
   isDemoMode: boolean;
 
   setMonthlyBudget: (amount: number) => void;
+  setMonthlySavingsTarget: (amount: number) => void;
   setCategoryLimit: (categoryId: string, limit: number) => void;
   getCategoryById: (id: string) => Category | undefined;
   toggleDemoMode: () => void;
@@ -15,11 +17,16 @@ interface BudgetState {
 
 export const useBudgetStore = create<BudgetState>((set, get) => ({
   monthlyBudget: DEFAULT_MONTHLY_BUDGET,
+  monthlySavingsTarget: 5000, // default ₹5,000/month
   categories: CATEGORIES,
   isDemoMode: true,
 
   setMonthlyBudget: (amount) => {
     set({ monthlyBudget: amount });
+  },
+
+  setMonthlySavingsTarget: (amount) => {
+    set({ monthlySavingsTarget: amount });
   },
 
   setCategoryLimit: (categoryId, limit) => {

@@ -20,10 +20,10 @@ export default function ConfigScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
 
-  const { monthlyBudget, categories, setMonthlyBudget, setCategoryLimit, isDemoMode, toggleDemoMode } = useBudgetStore();
+  const { monthlyBudget, monthlySavingsTarget, categories, setMonthlyBudget, setMonthlySavingsTarget, setCategoryLimit, isDemoMode, toggleDemoMode } = useBudgetStore();
 
-  // Local state for the text inputs to prevent cursor jumping
   const [budgetInput, setBudgetInput] = useState(monthlyBudget.toString());
+  const [savingsInput, setSavingsInput] = useState(monthlySavingsTarget.toString());
   const [categoryInputs, setCategoryInputs] = useState<Record<string, string>>(
     categories.reduce((acc, cat) => ({ ...acc, [cat.id]: cat.budgetLimit.toString() }), {})
   );
@@ -33,10 +33,14 @@ export default function ConfigScreen() {
 
   const handleBudgetChange = (text: string) => {
     setBudgetInput(text);
-    const val = parseInt(text.replace(/[^0-9]/g, ''), 10);
-    if (!isNaN(val)) {
-      setMonthlyBudget(val);
-    }
+    const num = parseFloat(text);
+    if (!isNaN(num) && num > 0) setMonthlyBudget(num);
+  };
+
+  const handleSavingsChange = (text: string) => {
+    setSavingsInput(text);
+    const num = parseFloat(text);
+    if (!isNaN(num) && num >= 0) setMonthlySavingsTarget(num);
   };
 
   const handleCategoryChange = (id: string, text: string) => {
@@ -85,6 +89,22 @@ export default function ConfigScreen() {
               onChangeText={handleBudgetChange}
               placeholder="0"
               placeholderTextColor={Colors.textMuted}
+            />
+          </View>
+        </NeoCard>
+
+        <NeoCard style={styles.card} color="#DFFF00">
+          <Text style={[styles.label, { color: Colors.black }]}>Monthly Savings Target</Text>
+          <Text style={{ fontFamily: Fonts.display, fontSize: FontSizes.sm, color: Colors.black, opacity: 0.7, marginBottom: Spacing.sm }}>Used to calculate wishlist goal timelines</Text>
+          <View style={[styles.inputContainer, { backgroundColor: Colors.white }]}>
+            <Text style={[styles.currencyPrefix, { color: Colors.black }]}>₹</Text>
+            <TextInput
+              style={[styles.textInput, { color: Colors.black }]}
+              keyboardType="number-pad"
+              value={savingsInput}
+              onChangeText={handleSavingsChange}
+              placeholder="5000"
+              placeholderTextColor="rgba(0,0,0,0.4)"
             />
           </View>
         </NeoCard>

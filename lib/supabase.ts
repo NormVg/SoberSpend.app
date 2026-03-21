@@ -1,14 +1,12 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createClient } from '@supabase/supabase-js';
 
 import { SUPABASE_ANON_KEY, SUPABASE_URL } from '@/constants/api';
 
-// Create Supabase client with AsyncStorage for React Native
+// Create Supabase client for React Native (Expo Go compatible)
 export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
   auth: {
-    storage: AsyncStorage,
-    autoRefreshToken: true,
-    persistSession: true,
+    // In Expo Go, AsyncStorage requires a native rebuild,
+    // so we fall back to in-memory storage for testing
     detectSessionInUrl: false,
   },
 });

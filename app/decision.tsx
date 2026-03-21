@@ -70,7 +70,7 @@ export default function DecisionScreen() {
     }
 
     // confirmPending handles BOTH local state and the full Supabase write
-    confirmPending();
+    await confirmPending();
 
     if (!isDemoMode && pendingTransaction) {
       const upiUrl = `upi://pay?pa=merchant@upi&pn=${encodeURIComponent(pendingTransaction.merchant)}&am=${pendingTransaction.amount}&tn=${encodeURIComponent(pendingTransaction.note || pendingTransaction.merchant)}`;

@@ -11,7 +11,7 @@ interface ExpenseState {
   addExpense: (expense: Omit<Expense, 'id' | 'date'>) => void;
   removeExpense: (id: string) => void;
   setPendingTransaction: (tx: PendingTransaction | null) => void;
-  confirmPendingTransaction: () => void;
+  confirmPendingTransaction: () => Promise<void>;
   clearAll: () => void;
   initialize: () => Promise<void>;
 }

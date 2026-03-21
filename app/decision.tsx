@@ -3,8 +3,6 @@ import { WarningBanner } from '@/components/decision/warning-banner';
 import { NeoButton } from '@/components/ui/neo-button';
 import { NeoCard } from '@/components/ui/neo-card';
 import { Colors, Fonts, FontSizes, Radii, Spacing } from '@/constants/theme';
-import { supabase } from '@/lib/supabase';
-import { useAuthStore } from '@/store/auth-store';
 import { useBudgetStore } from '@/store/budget-store';
 import { useExpenseStore } from '@/store/expense-store';
 import { currentMonthExpenses } from '@/utils/budget-engine';
@@ -66,24 +64,12 @@ export default function DecisionScreen() {
         : Haptics.NotificationFeedbackType.Success
     );
 
-    // Write to Supabase ONLY if not already saved by backend AI
-    // (We will remove the backend save, so we write everything from client)
-    const { user } = useAuthStore.getState();
-    if (user && pendingTransaction) {
-      // Background save to Supabase
-      supabase.from('Transactions').insert({
-        user_id: user.id,
-        amount: pendingTransaction.amount,
-        category: overrideCategoryId || pendingTransaction.category,
-      }).then(({ error }) => {
-        if (error) console.error('Failed to sync TX to Supabase', error);
-      });
-    }
-
     // Update pending with the overridden category before confirming locally
     if (overrideCategoryId) {
       setPending({ ...pendingTransaction, category: overrideCategoryId });
     }
+
+    // confirmPending handles BOTH local state and the full Supabase write
     confirmPending();
 
     if (!isDemoMode && pendingTransaction) {

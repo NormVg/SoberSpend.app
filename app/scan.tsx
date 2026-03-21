@@ -10,7 +10,7 @@ import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
 import { QrCode, ScanLine } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
-import { KeyboardAvoidingView, Linking, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function ScanScreen() {
@@ -38,45 +38,21 @@ export default function ScanScreen() {
   }, [isScannerOpen, permission]);
 
   const handleBarcodeScanned = ({ type, data }: { type: string; data: string }) => {
+    if (scanned) return;
     setScanned(true);
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
 
     const isDemoMode = useBudgetStore.getState().isDemoMode;
     const upiData = parseUPIString(data);
 
-    if (!isDemoMode && data.startsWith('upi://')) {
-      Linking.openURL(data).catch(() => alert("Couldn't open UPI app"));
-
-      if (upiData) {
-        setPending(upiToPendingTransaction(upiData));
-        router.push('/decision');
-      } else {
-        setIsScannerOpen(false);
-      }
-      return;
-    }
-
     if (upiData) {
-      // It's a valid UPI QR
       const pending = upiToPendingTransaction(upiData);
-
-      // Auto-fill forms in case user wants to review/edit
-      setMerchant(pending.merchant);
-      if (pending.amount > 0) setAmount(pending.amount.toString());
-      if (pending.note) setNote(pending.note);
-
-      setIsScannerOpen(false); // close scanner back to manual entry view
-
-      // If amount is present, we could jump straight to decision,
-      // but let's let them review the auto-filled amount in the manual view first
-      if (pending.amount > 0) {
-        // Automatically set it to state and push
-        setPending(pending);
-        router.push('/decision');
-      }
+      setPending(pending);
+      // Always go to in-app review first — Pay button will open UPI app
+      router.push('/decision');
     } else {
-      // Not a UPI QR, just show warning and close
-      alert('Not a valid UPI QR code');
+      alert('Not a valid UPI QR code. Please use manual entry.');
+      setScanned(false);
       setIsScannerOpen(false);
     }
   };

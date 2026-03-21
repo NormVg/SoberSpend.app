@@ -28,6 +28,7 @@ export interface WishlistItem {
   name: string;
   price: number;
   addedAt: string; // ISO string
+  categoryId?: string;
 }
 
 export interface DecisionResult {

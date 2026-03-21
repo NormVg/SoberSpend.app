@@ -167,9 +167,10 @@ const styles = StyleSheet.create({
     paddingBottom: Spacing.xs,
   },
   headerTitle: {
-    fontFamily: Fonts.accent,
-    fontSize: FontSizes.xl,
-    color: Colors.accent,
+    fontFamily: Fonts.display,
+    fontSize: FontSizes.xxl,
+    color: Colors.white,
+    fontWeight: '700',
   },
   sectionTitle: {
     fontFamily: Fonts.display,

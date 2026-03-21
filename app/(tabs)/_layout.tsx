@@ -1,6 +1,7 @@
 import { Borders, Colors, Spacing } from '@/constants/theme';
+import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import * as Haptics from 'expo-haptics';
-import { Tabs, usePathname, useRouter } from 'expo-router';
+import { usePathname, useRouter, withLayoutContext } from 'expo-router';
 import { BarChart3, Heart, Home, ScanLine } from 'lucide-react-native';
 import React from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
@@ -70,18 +71,24 @@ function CustomTabBar() {
   );
 }
 
+
+const { Navigator } = createMaterialTopTabNavigator();
+const MaterialTopTabs = withLayoutContext(Navigator);
+
 export default function TabLayout() {
   return (
-    <Tabs
-      tabBar={() => <CustomTabBar />}
+    <MaterialTopTabs
+      tabBar={(props) => <CustomTabBar />}
+      tabBarPosition="bottom"
       screenOptions={{
-        headerShown: false,
+        swipeEnabled: true,
+        animationEnabled: true,
       }}
     >
-      <Tabs.Screen name="index" />
-      <Tabs.Screen name="insights" />
-      <Tabs.Screen name="wishlist" />
-    </Tabs>
+      <MaterialTopTabs.Screen name="insights" />
+      <MaterialTopTabs.Screen name="index" />
+      <MaterialTopTabs.Screen name="wishlist" />
+    </MaterialTopTabs>
   );
 }
 

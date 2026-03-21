@@ -1,60 +1,17 @@
-import { SpendingChart } from '@/components/insights/spending-chart';
-import { StatCard } from '@/components/insights/stat-card';
+import { CriticalWindowCard } from '@/components/insights/critical-window-card';
+import { HardTruthCard } from '@/components/insights/hard-truth-card';
+import { PatternCard } from '@/components/insights/pattern-card';
+import { SavingsGoalCard } from '@/components/insights/savings-goal-card';
+import { SpendingTrendsCard } from '@/components/insights/spending-trends-card';
+import { WarningBanner } from '@/components/insights/warning-banner';
 import { Colors, Fonts, FontSizes, Spacing } from '@/constants/theme';
-import { useBudgetStore } from '@/store/budget-store';
-import { useExpenseStore } from '@/store/expense-store';
-import { currentMonthExpenses, dailyAverage, spentByCategory, totalSpent } from '@/utils/budget-engine';
-import { formatCurrency } from '@/utils/format';
-import React, { useMemo } from 'react';
+import { Bell } from 'lucide-react-native';
+import React from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function InsightsScreen() {
   const insets = useSafeAreaInsets();
-  const expenses = useExpenseStore((s) => s.expenses);
-  const { categories, monthlyBudget } = useBudgetStore();
-
-  const monthExpenses = currentMonthExpenses(expenses);
-  const total = totalSpent(monthExpenses);
-  const byCat = spentByCategory(monthExpenses);
-  const avgDaily = dailyAverage(monthExpenses);
-
-  // Find top spending category
-  const topCategory = useMemo(() => {
-    let maxId = '';
-    let maxVal = 0;
-    for (const [id, val] of Object.entries(byCat)) {
-      if (val > maxVal) {
-        maxId = id;
-        maxVal = val;
-      }
-    }
-    return categories.find((c) => c.id === maxId);
-  }, [byCat, categories]);
-
-  // Weekly comparison (simple: compare last 7d vs prev 7d)
-  const weeklyChange = useMemo(() => {
-    const now = Date.now();
-    const oneWeek = 7 * 24 * 60 * 60 * 1000;
-    const thisWeek = expenses.filter((e) => now - new Date(e.date).getTime() < oneWeek);
-    const lastWeek = expenses.filter((e) => {
-      const diff = now - new Date(e.date).getTime();
-      return diff >= oneWeek && diff < oneWeek * 2;
-    });
-    const thisTotal = totalSpent(thisWeek);
-    const lastTotal = totalSpent(lastWeek);
-    if (lastTotal === 0) return 0;
-    return Math.round(((thisTotal - lastTotal) / lastTotal) * 100);
-  }, [expenses]);
-
-  // Chart data: spending by category
-  const chartData = useMemo(() => {
-    return categories
-      .filter((c) => (byCat[c.id] || 0) > 0)
-      .map((c) => ({ label: c.name.slice(0, 4), value: byCat[c.id] || 0 }));
-  }, [byCat, categories]);
-
-  const budgetUsedPercent = monthlyBudget > 0 ? Math.round((total / monthlyBudget) * 100) : 0;
 
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
@@ -63,70 +20,39 @@ export default function InsightsScreen() {
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
-        <Text style={styles.title}>Insights</Text>
-
-        {/* Stat Cards */}
-        <View style={styles.statsRow}>
-          <View style={styles.statItem}>
-            <StatCard
-              title="Weekly Change"
-              value={`${weeklyChange >= 0 ? '+' : ''}${weeklyChange}%`}
-              color={weeklyChange > 0 ? Colors.nearLimit : Colors.safe}
-              subtitle={weeklyChange > 0 ? 'spending more' : 'spending less'}
-            />
-          </View>
-          <View style={styles.statItem}>
-            <StatCard
-              title="Top Category"
-              value={topCategory?.name || '—'}
-              color={Colors.purple}
-              subtitle={topCategory ? formatCurrency(byCat[topCategory.id] || 0) : undefined}
-            />
-          </View>
+        {/* Header */}
+        <View style={styles.header}>
+          <Text style={styles.headerTitle}>Sober.Spend</Text>
+          <Bell size={24} color={Colors.white} />
         </View>
 
-        <View style={[styles.statsRow, { marginTop: Spacing.md }]}>
-          <View style={styles.statItem}>
-            <StatCard
-              title="Daily Average"
-              value={formatCurrency(avgDaily)}
-              color={Colors.orange}
-              subtitle="per day"
-            />
-          </View>
-          <View style={styles.statItem}>
-            <StatCard
-              title="Budget Used"
-              value={`${budgetUsedPercent}%`}
-              color={budgetUsedPercent >= 80 ? Colors.exceeded : Colors.mint}
-              subtitle={formatCurrency(total)}
-            />
-          </View>
-        </View>
+        <WarningBanner message="YOU'VE SPENT 30% MORE ON FOOD THIS WEEK COMPARED TO LAST." />
+        <PatternCard />
+        <CriticalWindowCard />
+        <SpendingTrendsCard />
 
-        {/* Spending Chart */}
-        <Text style={[styles.sectionTitle, { marginTop: Spacing.xl }]}>By Category</Text>
-        {chartData.length > 0 ? (
-          <SpendingChart data={chartData} />
-        ) : (
-          <Text style={styles.empty}>No data yet</Text>
-        )}
+        <Text style={styles.sectionHeading}>TIME TO SAVE</Text>
 
-        {/* Category Breakdown */}
-        <Text style={[styles.sectionTitle, { marginTop: Spacing.xl }]}>Breakdown</Text>
-        {categories.map((cat) => {
-          const spent = byCat[cat.id] || 0;
-          if (spent === 0) return null;
-          const pct = cat.budgetLimit > 0 ? Math.round((spent / cat.budgetLimit) * 100) : 0;
-          return (
-            <View key={cat.id} style={styles.breakdownRow}>
-              <View style={[styles.dot, { backgroundColor: cat.color }]} />
-              <Text style={styles.breakdownName}>{cat.name}</Text>
-              <Text style={styles.breakdownAmount}>{formatCurrency(spent)}</Text>
-              <Text style={styles.breakdownPct}>{pct}%</Text>
-            </View>
-          );
-        })}
+        <SavingsGoalCard
+          title="NEW LAPTOP"
+          price="$1,200.00"
+          daysLeft={14}
+          subtitle="Based on current spending habits."
+          color="#DFFF00"
+          icon="laptop"
+          progressPercent={60}
+        />
+        <SavingsGoalCard
+          title="TOKYO TRIP"
+          price="$2,500.00"
+          daysLeft={82}
+          subtitle="Stop Friday bars to save 12 days."
+          color="#00FFFF"
+          icon="plane"
+          progressPercent={20}
+        />
+
+        <HardTruthCard />
 
         {/* Bottom Spacer for Nav */}
         <View style={{ height: 130 }} />
@@ -138,7 +64,7 @@ export default function InsightsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.bg,
+    backgroundColor: '#111',
   },
   scroll: {
     flex: 1,
@@ -146,65 +72,26 @@ const styles = StyleSheet.create({
   content: {
     paddingHorizontal: Spacing.lg,
   },
-  title: {
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: Spacing.lg,
+    marginBottom: Spacing.sm,
+  },
+  headerTitle: {
     fontFamily: Fonts.display,
     fontSize: FontSizes.xxl,
     color: Colors.white,
     fontWeight: '700',
-    paddingVertical: Spacing.lg,
   },
-  statsRow: {
-    flexDirection: 'row',
-    gap: Spacing.md,
-  },
-  statItem: {
-    flex: 1,
-  },
-  sectionTitle: {
+  sectionHeading: {
     fontFamily: Fonts.display,
-    fontSize: FontSizes.lg,
-    color: Colors.textSecondary,
+    fontSize: 28,
+    color: '#DFFF00',
+    textTransform: 'uppercase',
+    fontStyle: 'italic',
+    marginTop: Spacing.lg,
     marginBottom: Spacing.md,
-  },
-  empty: {
-    fontFamily: Fonts.display,
-    fontSize: FontSizes.md,
-    color: Colors.textMuted,
-    textAlign: 'center',
-    paddingVertical: Spacing.xl,
-  },
-  breakdownRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: Spacing.md,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
-    gap: Spacing.sm,
-  },
-  dot: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    borderWidth: 2,
-    borderColor: Colors.black,
-  },
-  breakdownName: {
-    flex: 1,
-    fontFamily: Fonts.display,
-    fontSize: FontSizes.md,
-    color: Colors.white,
-  },
-  breakdownAmount: {
-    fontFamily: Fonts.display,
-    fontSize: FontSizes.md,
-    color: Colors.white,
-    fontWeight: '700',
-  },
-  breakdownPct: {
-    fontFamily: Fonts.display,
-    fontSize: FontSizes.sm,
-    color: Colors.textSecondary,
-    width: 40,
-    textAlign: 'right',
   },
 });

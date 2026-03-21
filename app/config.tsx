@@ -71,22 +71,6 @@ export default function ConfigScreen() {
 
       <ScrollView contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + Spacing.xxl }]}>
 
-        {/* Engine Settings */}
-        <Text style={styles.sectionTitle}>ENGINE</Text>
-        <NeoCard style={{ ...styles.card as object, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: Spacing.md }} color={Colors.surface}>
-          <View>
-            <Text style={[styles.label, { marginBottom: 0, color: Colors.white }]}>Demo Mode</Text>
-            <Text style={{ fontFamily: Fonts.display, fontSize: FontSizes.sm, color: Colors.textMuted, marginTop: 4 }}>
-              When OFF, QR scans deep-link to real UPI app.
-            </Text>
-          </View>
-          <Switch
-            value={isDemoMode}
-            onValueChange={toggleDemoMode}
-            trackColor={{ false: Colors.border, true: Colors.accent }}
-            thumbColor={Colors.white}
-          />
-        </NeoCard>
 
         {/* Global Budget */}
         <Text style={[styles.sectionTitle, { marginTop: Spacing.md }]}>GLOBAL BUDGET</Text>
@@ -141,6 +125,25 @@ export default function ConfigScreen() {
             </NeoCard>
           )
         })}
+
+        {/* Demo Mode — Developer Section at the bottom */}
+        <Text style={[styles.sectionTitle, { marginTop: Spacing.xl }]}>DEVELOPER</Text>
+        <NeoCard style={{ marginBottom: Spacing.md }} color={Colors.surface}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+            <View style={{ flex: 1, marginRight: Spacing.md }}>
+              <Text style={[styles.label, { marginBottom: 0, color: Colors.white }]}>Demo Mode</Text>
+              <Text style={{ fontFamily: Fonts.display, fontSize: FontSizes.sm, color: Colors.textMuted, marginTop: 4 }}>
+                Toggle sample data for testing
+              </Text>
+            </View>
+            <Switch
+              value={isDemoMode}
+              onValueChange={toggleDemoMode}
+              trackColor={{ false: Colors.border, true: Colors.accent }}
+              thumbColor={Colors.white}
+            />
+          </View>
+        </NeoCard>
 
       </ScrollView>
     </KeyboardAvoidingView>

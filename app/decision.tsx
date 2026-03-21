@@ -9,8 +9,9 @@ import { evaluateTransaction } from '@/utils/decision-engine';
 import { formatCurrency } from '@/utils/format';
 import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
+import { AlertTriangle, CheckCircle } from 'lucide-react-native';
 import React from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Linking, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function DecisionScreen() {
@@ -20,7 +21,7 @@ export default function DecisionScreen() {
   const confirmPending = useExpenseStore((s) => s.confirmPendingTransaction);
   const setPending = useExpenseStore((s) => s.setPendingTransaction);
   const expenses = useExpenseStore((s) => s.expenses);
-  const { monthlyBudget, categories } = useBudgetStore();
+  const { monthlyBudget, categories, isDemoMode } = useBudgetStore();
 
   // If no pending transaction, go back
   if (!pendingTransaction) {
@@ -56,6 +57,13 @@ export default function DecisionScreen() {
         : Haptics.NotificationFeedbackType.Success
     );
     confirmPending();
+
+    if (!isDemoMode && pendingTransaction) {
+      // Build the UPI deep link from the pending transaction and open it
+      const upiUrl = `upi://pay?pa=merchant@upi&pn=${encodeURIComponent(pendingTransaction.merchant)}&am=${pendingTransaction.amount}&tn=${encodeURIComponent(pendingTransaction.note || pendingTransaction.merchant)}`;
+      Linking.openURL(upiUrl).catch(() => { });
+    }
+
     router.dismissAll();
   };
 
@@ -117,10 +125,13 @@ export default function DecisionScreen() {
       {/* Action Buttons */}
       <View style={[styles.actions, { paddingBottom: insets.bottom + Spacing.md }]}>
         <NeoButton
-          title={decision.warningLevel === 'exceeded' ? 'Pay Anyway ⚠️' : 'Pay'}
+          title={decision.warningLevel === 'exceeded' ? 'Pay Anyway' : 'Pay'}
           variant={decision.warningLevel === 'exceeded' ? 'danger' : 'primary'}
           size="lg"
           onPress={handlePay}
+          icon={decision.warningLevel === 'exceeded'
+            ? <AlertTriangle size={20} color="#DFFF00" strokeWidth={2.5} />
+            : <CheckCircle size={20} color={Colors.white} strokeWidth={2.5} />}
         />
         <View style={{ height: Spacing.md }} />
         <NeoButton

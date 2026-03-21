@@ -263,6 +263,18 @@ export default function ScanScreen() {
         </View>
 
         <View style={styles.inputGroup}>
+          <Text style={styles.inputLabel}>Amount (₹)</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="0"
+            placeholderTextColor={Colors.textMuted}
+            value={amount}
+            onChangeText={setAmount}
+            keyboardType="numeric"
+          />
+        </View>
+
+        <View style={styles.inputGroup}>
           <Text style={styles.inputLabel}>Category</Text>
           <View style={styles.chipGrid}>
             {categories.filter(c => c.id !== 'other').map((cat) => {

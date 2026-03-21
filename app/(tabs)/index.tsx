@@ -1,98 +1,197 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
-
-import { HelloWave } from '@/components/hello-wave';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
+import { BudgetSummary } from '@/components/dashboard/budget-summary';
+import { CategoryCard } from '@/components/dashboard/category-card';
+import { RiskBanner } from '@/components/dashboard/risk-banner';
+import { TransactionItem } from '@/components/dashboard/transaction-item';
+import { Colors, Fonts, FontSizes, Spacing } from '@/constants/theme';
+import { useBudgetStore } from '@/store/budget-store';
+import { useExpenseStore } from '@/store/expense-store';
+import { currentMonthExpenses, spentByCategory, totalSpent } from '@/utils/budget-engine';
 import { Link } from 'expo-router';
+import { Settings } from 'lucide-react-native';
+import React, { useMemo } from 'react';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-export default function HomeScreen() {
+export default function DashboardScreen() {
+  const insets = useSafeAreaInsets();
+  const expenses = useExpenseStore((s) => s.expenses);
+  const { monthlyBudget, categories } = useBudgetStore();
+
+  const monthExpenses = currentMonthExpenses(expenses);
+  const total = totalSpent(monthExpenses);
+  const byCat = spentByCategory(monthExpenses);
+  const recent = monthExpenses.slice(0, 8);
+
+  // Funny, highly reactive risk banner logic
+  const riskProps = useMemo(() => {
+    if (total === 0) return null;
+
+    const totalPct = (total / monthlyBudget) * 100;
+
+    if (totalPct >= 100) {
+      return {
+        riskLevel: 'BROKE' as any,
+        message: 'Congratulations, you have officially spent all your money. Time to eat ice cubes for dinner.',
+      };
+    }
+    if (totalPct >= 90) {
+      return {
+        riskLevel: 'DANGER' as any,
+        message: "Bro you have basically nothing left for the month. Delete the app and pretend this isn't happening.",
+      };
+    }
+
+    let maxId = '';
+    let maxPct = 0;
+    for (const [id, val] of Object.entries(byCat)) {
+      const cat = categories.find((c) => c.id === id);
+      if (cat && cat.budgetLimit > 0) {
+        const pct = (val / cat.budgetLimit) * 100;
+        if (pct > maxPct) { maxId = id; maxPct = pct; }
+      }
+    }
+    const maxCat = categories.find((c) => c.id === maxId);
+
+    if (!maxCat || maxPct < 20) {
+      return {
+        riskLevel: 'CHILL' as any,
+        message: "You actually haven't ruined your finances yet. Rare.",
+      }
+    }
+
+    if (maxPct >= 100) {
+      return {
+        riskLevel: 'WASTED' as any,
+        message: `You blew your entire budget on ${maxCat.name}. Honestly, was it even worth it?`,
+        highlightedWord: maxCat.name,
+      }
+    }
+    if (maxPct >= 80) {
+      return {
+        riskLevel: 'WARNING' as any,
+        message: `Chill out on ${maxCat.name}. You're basically funding their entire business this month.`,
+        highlightedWord: maxCat.name,
+      }
+    }
+    if (maxPct >= 50) {
+      return {
+        riskLevel: 'SUS' as any,
+        message: `You're halfway through your ${maxCat.name} budget. Keep swiping, I dare you.`,
+        highlightedWord: maxCat.name,
+      }
+    }
+
+    return {
+      riskLevel: 'SAFE' as any,
+      message: `You've spent a little on ${maxCat.name}. Keep it cute.`,
+      highlightedWord: maxCat.name,
+    };
+  }, [byCat, total, categories, monthlyBudget]);
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
+    <View style={[styles.container, { paddingTop: insets.top }]}>
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Header */}
+        <View style={styles.header}>
+          <Text style={styles.headerTitle}>Sober.Spend</Text>
+          <Link href="/config" asChild>
+            <Pressable style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]}>
+              <Settings size={28} color={Colors.white} />
+            </Pressable>
+          </Link>
+        </View>
 
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+        {/* Budget Summary */}
+        <BudgetSummary totalSpent={total} monthlyBudget={monthlyBudget} />
+
+        {/* Risk Banner */}
+        {riskProps && (
+          <RiskBanner
+            riskLevel={riskProps.riskLevel}
+            message={riskProps.message}
+            highlightedWord={riskProps.highlightedWord}
+          />
+        )}
+
+        {/* Category Cards */}
+        <Text style={styles.sectionTitle}>Budgets</Text>
+        <View style={styles.categoryGrid}>
+          {categories.map((cat) => (
+            <View key={cat.id} style={styles.categoryItem}>
+              <CategoryCard category={cat} spent={byCat[cat.id] || 0} />
+            </View>
+          ))}
+        </View>
+
+        {/* Recent Transactions */}
+        <Text style={[styles.sectionTitle, { marginTop: Spacing.lg }]}>Recent</Text>
+        <View style={styles.transactionsList}>
+          {recent.map((expense) => {
+            const cat = categories.find((c) => c.id === expense.category);
+            return (
+              <TransactionItem key={expense.id} expense={expense} category={cat} />
+            );
+          })}
+          {recent.length === 0 && (
+            <Text style={styles.empty}>No transactions yet</Text>
+          )}
+        </View>
+
+        {/* Bottom spacer for floating navbar */}
+        <View style={{ height: 130 }} />
+      </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
+  container: {
+    flex: 1,
+    backgroundColor: Colors.bg,
+  },
+  scroll: {
+    flex: 1,
+  },
+  content: {
+    paddingHorizontal: Spacing.lg,
+  },
+  header: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    justifyContent: 'space-between',
+    paddingTop: Spacing.md,
+    paddingBottom: Spacing.xs,
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+  headerTitle: {
+    fontFamily: Fonts.accent,
+    fontSize: FontSizes.xl,
+    color: Colors.accent,
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  sectionTitle: {
+    fontFamily: Fonts.display,
+    fontSize: FontSizes.lg,
+    color: Colors.textSecondary,
+    marginBottom: Spacing.md,
+    marginTop: Spacing.sm,
+  },
+  categoryGrid: {
+    gap: Spacing.md,
+  },
+  categoryItem: {
+    // Each card takes full width
+  },
+  transactionsList: {
+    marginBottom: Spacing.lg,
+  },
+  empty: {
+    fontFamily: Fonts.display,
+    fontSize: FontSizes.md,
+    color: Colors.textMuted,
+    textAlign: 'center',
+    paddingVertical: Spacing.xl,
   },
 });

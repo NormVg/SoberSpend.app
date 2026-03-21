@@ -1,53 +1,73 @@
 /**
- * Below are the colors that are used in the app. The colors are defined in the light and dark mode.
- * There are many other ways to style your app. For example, [Nativewind](https://www.nativewind.dev/), [Tamagui](https://tamagui.dev/), [unistyles](https://reactnativeunistyles.vercel.app), etc.
+ * Sober.Spend — Dark Neo-Brutalist Design System
  */
 
-import { Platform } from 'react-native';
-
-const tintColorLight = '#0a7ea4';
-const tintColorDark = '#fff';
-
 export const Colors = {
-  light: {
-    text: '#11181C',
-    background: '#fff',
-    tint: tintColorLight,
-    icon: '#687076',
-    tabIconDefault: '#687076',
-    tabIconSelected: tintColorLight,
-  },
-  dark: {
-    text: '#ECEDEE',
-    background: '#151718',
-    tint: tintColorDark,
-    icon: '#9BA1A6',
-    tabIconDefault: '#9BA1A6',
-    tabIconSelected: tintColorDark,
-  },
+  bg: '#0A0A0A',
+  surface: '#1A1A1A',
+  surfaceLight: '#2A2A2A',
+
+  text: '#FFFFFF',
+  textSecondary: '#888888',
+  textMuted: '#666666',
+
+  accent: '#C54770',
+  accentLight: '#D65A83',
+
+  // Category card colors
+  mint: '#A8E6CF',
+  yellow: '#FFD93D',
+  purple: '#C3AED6',
+  orange: '#FFB347',
+  pink: '#FFB3BA',
+  blue: '#87CEEB',
+
+  // Status colors
+  safe: '#A8E6CF',
+  nearLimit: '#FFD93D',
+  exceeded: '#FF6B6B',
+
+  border: '#333333',
+  borderLight: '#444444',
+
+  white: '#FFFFFF',
+  black: '#000000',
 };
 
-export const Fonts = Platform.select({
-  ios: {
-    /** iOS `UIFontDescriptorSystemDesignDefault` */
-    sans: 'system-ui',
-    /** iOS `UIFontDescriptorSystemDesignSerif` */
-    serif: 'ui-serif',
-    /** iOS `UIFontDescriptorSystemDesignRounded` */
-    rounded: 'ui-rounded',
-    /** iOS `UIFontDescriptorSystemDesignMonospaced` */
-    mono: 'ui-monospace',
-  },
-  default: {
-    sans: 'normal',
-    serif: 'serif',
-    rounded: 'normal',
-    mono: 'monospace',
-  },
-  web: {
-    sans: "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
-    serif: "Georgia, 'Times New Roman', serif",
-    rounded: "'SF Pro Rounded', 'Hiragino Maru Gothic ProN', Meiryo, 'MS PGothic', sans-serif",
-    mono: "SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace",
-  },
-});
+export const Spacing = {
+  xs: 4,
+  sm: 8,
+  md: 16,
+  lg: 24,
+  xl: 32,
+  xxl: 48,
+} as const;
+
+export const Radii = {
+  sm: 8,
+  md: 14,
+  lg: 20,
+  pill: 999,
+} as const;
+
+export const Borders = {
+  thin: 2,
+  medium: 3,
+  thick: 4,
+} as const;
+
+export const Fonts = {
+  display: 'JockeyOne-Regular',
+  body: 'JockeyOne-Regular',
+  accent: 'SignPainterHouseScript',
+} as const;
+
+export const FontSizes = {
+  xs: 12,
+  sm: 14,
+  md: 16,
+  lg: 20,
+  xl: 28,
+  xxl: 40,
+  hero: 56,
+} as const;

@@ -1,4 +1,4 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
+import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
@@ -6,7 +6,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Animated, Easing, StyleSheet } from 'react-native';
 import 'react-native-reanimated';
 
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import { Fonts } from '@/constants/theme';
 
 export const unstable_settings = {
   anchor: '(tabs)',
@@ -17,15 +17,20 @@ const SPLASH_BG_COLOR = '#C54770';
 SplashScreen.preventAutoHideAsync().catch(() => null);
 
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
+  const [fontsLoaded] = useFonts({
+    [Fonts.display]: require('@/assets/fonts/JockeyOne-Regular.ttf'),
+    [Fonts.accent]: require('@/assets/fonts/SignPainterHouseScript.ttf'),
+  });
   const [isAppReady, setIsAppReady] = useState(false);
   const [showLaunchAnimation, setShowLaunchAnimation] = useState(true);
   const logoScale = useRef(new Animated.Value(1)).current;
   const overlayOpacity = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
-    setIsAppReady(true);
-  }, []);
+    if (fontsLoaded) {
+      setIsAppReady(true);
+    }
+  }, [fontsLoaded]);
 
   useEffect(() => {
     if (!isAppReady) {
@@ -78,13 +83,36 @@ export default function RootLayout() {
     };
   }, [isAppReady, logoScale, overlayOpacity]);
 
+  if (!fontsLoaded) {
+    return null;
+  }
+
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
+    <>
+      <Stack
+        screenOptions={{
+          headerShown: false,
+          contentStyle: { backgroundColor: '#000000' },
+          animation: 'slide_from_right',
+        }}
+      >
+        <Stack.Screen name="(tabs)" />
+        <Stack.Screen
+          name="scan"
+          options={{
+            animation: 'slide_from_bottom',
+            gestureEnabled: true,
+          }}
+        />
+        <Stack.Screen
+          name="decision"
+          options={{
+            animation: 'slide_from_right',
+            gestureEnabled: false,
+          }}
+        />
       </Stack>
-      <StatusBar style="auto" />
+      <StatusBar style="light" />
       {showLaunchAnimation ? (
         <Animated.View
           pointerEvents="none"
@@ -107,7 +135,7 @@ export default function RootLayout() {
           />
         </Animated.View>
       ) : null}
-    </ThemeProvider>
+    </>
   );
 }
 

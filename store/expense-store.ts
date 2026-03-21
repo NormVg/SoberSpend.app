@@ -2,6 +2,7 @@ import { supabase } from '@/lib/supabase';
 import { useAuthStore } from '@/store/auth-store';
 import type { Expense, PendingTransaction } from '@/types';
 import { generateId } from '@/utils/format';
+import { Alert } from 'react-native';
 import { create } from 'zustand';
 
 interface ExpenseState {
@@ -73,15 +74,20 @@ export const useExpenseStore = create<ExpenseState>((set, get) => ({
 
     const user = useAuthStore.getState().user;
     if (user) {
-      await supabase.from('Transactions').insert({
+      const { error } = await supabase.from('Transactions').insert({
         id: newExpense.id,
         user_id: user.id,
-        amount: newExpense.amount,
+        amount: Math.round(newExpense.amount),
         category: newExpense.category,
         merchant: newExpense.merchant,
-        note: newExpense.note,
+        note: newExpense.note || null,
         timestamp: newExpense.date,
       });
+
+      if (error) {
+        console.error('Supabase raw error:', error);
+        Alert.alert('Database Error', error.message || 'Failed to save transaction');
+      }
     }
   },
 

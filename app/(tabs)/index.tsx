@@ -7,7 +7,6 @@ import { useBudgetStore } from '@/store/budget-store';
 import { useExpenseStore } from '@/store/expense-store';
 import { currentMonthExpenses, spentByCategory, totalSpent } from '@/utils/budget-engine';
 import { Link } from 'expo-router';
-import { Settings } from 'lucide-react-native';
 import React, { useMemo } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -15,7 +14,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 export default function DashboardScreen() {
   const insets = useSafeAreaInsets();
   const expenses = useExpenseStore((s) => s.expenses);
-  const { monthlyBudget, categories } = useBudgetStore();
+  const { monthlyBudget, categories, userName, financialPersonality } = useBudgetStore();
 
   const monthExpenses = currentMonthExpenses(expenses);
   const total = totalSpent(monthExpenses);
@@ -97,12 +96,21 @@ export default function DashboardScreen() {
       >
         {/* Header */}
         <View style={styles.header}>
-          <Text style={styles.headerTitle}>Sober.Spend</Text>
-          <Link href="/config" asChild>
-            <Pressable style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]}>
-              <Settings size={28} color={Colors.white} />
-            </Pressable>
-          </Link>
+          <View>
+            <Text style={styles.headerTitle}>Sober.Spend</Text>
+            {userName ? (
+              <Link href="/profile" asChild>
+                <Pressable style={styles.profileBadge}>
+                  <Text style={styles.profileName}>Hey, {userName}</Text>
+                  {financialPersonality && (
+                    <View style={styles.personaPill}>
+                      <Text style={styles.personaText}>{financialPersonality}</Text>
+                    </View>
+                  )}
+                </Pressable>
+              </Link>
+            ) : null}
+          </View>
         </View>
 
         {/* Budget Summary */}
@@ -128,7 +136,14 @@ export default function DashboardScreen() {
         </View>
 
         {/* Recent Transactions */}
-        <Text style={[styles.sectionTitle, { marginTop: Spacing.lg }]}>Recent</Text>
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: Spacing.lg, marginBottom: Spacing.md }}>
+          <Text style={styles.sectionTitle}>Recent</Text>
+          <Link href="/transactions" asChild>
+            <Pressable>
+              <Text style={{ fontFamily: Fonts.display, fontSize: FontSizes.sm, color: Colors.accent }}>See All →</Text>
+            </Pressable>
+          </Link>
+        </View>
         <View style={styles.transactionsList}>
           {recent.map((expense) => {
             const cat = categories.find((c) => c.id === expense.category);
@@ -164,13 +179,38 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingTop: Spacing.md,
-    paddingBottom: Spacing.xs,
+    paddingBottom: Spacing.xl,
+    marginBottom: Spacing.sm,
   },
   headerTitle: {
     fontFamily: Fonts.display,
     fontSize: FontSizes.xxl,
     color: Colors.white,
     fontWeight: '700',
+  },
+  profileBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 2,
+    gap: Spacing.sm,
+  },
+  profileName: {
+    fontFamily: Fonts.display,
+    fontSize: FontSizes.md,
+    color: Colors.textSecondary,
+  },
+  personaPill: {
+    backgroundColor: Colors.accent,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 12,
+  },
+  personaText: {
+    fontFamily: Fonts.display,
+    fontSize: 10,
+    color: Colors.black,
+    fontWeight: '700',
+    textTransform: 'uppercase',
   },
   sectionTitle: {
     fontFamily: Fonts.display,

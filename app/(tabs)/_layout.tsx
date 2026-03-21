@@ -1,7 +1,8 @@
 import { Borders, Colors, Radii, Spacing } from '@/constants/theme';
+import { useBudgetStore } from '@/store/budget-store';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import * as Haptics from 'expo-haptics';
-import { usePathname, useRouter, withLayoutContext } from 'expo-router';
+import { Redirect, usePathname, useRouter, withLayoutContext } from 'expo-router';
 import { BarChart3, Heart, Home, ScanLine } from 'lucide-react-native';
 import React from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
@@ -82,6 +83,12 @@ const { Navigator } = createMaterialTopTabNavigator();
 const MaterialTopTabs = withLayoutContext(Navigator);
 
 export default function TabLayout() {
+  const hasCompletedOnboarding = useBudgetStore((s) => s.hasCompletedOnboarding);
+
+  if (!hasCompletedOnboarding) {
+    return <Redirect href={"/onboarding" as any} />;
+  }
+
   return (
     <MaterialTopTabs
       tabBar={(props) => <CustomTabBar />}

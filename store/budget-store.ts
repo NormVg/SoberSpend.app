@@ -8,9 +8,19 @@ interface BudgetState {
   categories: Category[];
   isDemoMode: boolean;
 
+  hasCompletedOnboarding: boolean;
+  userName: string;
+  financialPersonality: 'Saver' | 'Balanced' | 'Spender' | null;
+  spendingWeakness: string[];
+  primaryGoal: string | null;
+  weekendVibe: string | null;
+  purchaseRegret: string | null;
+  savingsRate: string | null;
+
   setMonthlyBudget: (amount: number) => void;
   setMonthlySavingsTarget: (amount: number) => void;
   setCategoryLimit: (categoryId: string, limit: number) => void;
+  setOnboardingData: (data: Partial<Pick<BudgetState, 'userName' | 'financialPersonality' | 'spendingWeakness' | 'hasCompletedOnboarding' | 'primaryGoal' | 'weekendVibe' | 'purchaseRegret' | 'savingsRate'>>) => void;
   getCategoryById: (id: string) => Category | undefined;
   toggleDemoMode: () => void;
 }
@@ -20,6 +30,16 @@ export const useBudgetStore = create<BudgetState>((set, get) => ({
   monthlySavingsTarget: 5000, // default ₹5,000/month
   categories: CATEGORIES,
   isDemoMode: true,
+  hasCompletedOnboarding: false,
+  userName: '',
+  financialPersonality: null,
+  spendingWeakness: [],
+  primaryGoal: null,
+  weekendVibe: null,
+  purchaseRegret: null,
+  savingsRate: null,
+
+  setOnboardingData: (data) => set((state) => ({ ...state, ...data })),
 
   setMonthlyBudget: (amount) => {
     set({ monthlyBudget: amount });

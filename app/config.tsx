@@ -98,7 +98,10 @@ export default function ConfigScreen() {
       const response = await fetch(`${API_BASE_URL}/api/suggest-budget`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ user_id: user.id }),
+        body: JSON.stringify({
+          user_id: user.id,
+          override_budget: parseFloat(budgetInput) || undefined
+        }),
       });
       const json = await response.json();
       if (!response.ok) throw new Error(json.message || 'AI failed');

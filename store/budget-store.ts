@@ -20,7 +20,7 @@ interface BudgetState {
   setMonthlyBudget: (amount: number) => void;
   setMonthlySavingsTarget: (amount: number) => void;
   setCategoryLimit: (categoryId: string, limit: number) => void;
-  setOnboardingData: (data: Partial<Pick<BudgetState, 'userName' | 'financialPersonality' | 'spendingWeakness' | 'hasCompletedOnboarding' | 'primaryGoal' | 'weekendVibe' | 'purchaseRegret' | 'savingsRate'>>) => void;
+  setOnboardingData: (data: Partial<Pick<BudgetState, 'userName' | 'financialPersonality' | 'spendingWeakness' | 'hasCompletedOnboarding' | 'primaryGoal' | 'weekendVibe' | 'purchaseRegret' | 'savingsRate' | 'monthlyBudget'>>) => void;
   getCategoryById: (id: string) => Category | undefined;
   toggleDemoMode: () => void;
 }

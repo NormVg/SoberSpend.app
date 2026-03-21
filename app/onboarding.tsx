@@ -82,6 +82,14 @@ export default function OnboardingScreen() {
         body: JSON.stringify({
           user_id,
           bad_habits_prompt: prompt,
+          name: name.trim() || 'Stranger',
+          monthly_budget: bg,
+          financial_personality: personality,
+          spending_weakness: weaknesses,
+          primary_goal: goal,
+          weekend_vibe: weekendVibe,
+          purchase_regret: purchaseRegret,
+          savings_rate: savingsRate,
         }),
       }).catch(err => console.warn('Failed to sync context to backend:', err));
     }

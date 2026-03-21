@@ -6,13 +6,14 @@ import { Colors, Fonts, FontSizes, Spacing } from '@/constants/theme';
 import { useBudgetStore } from '@/store/budget-store';
 import { useExpenseStore } from '@/store/expense-store';
 import { currentMonthExpenses, spentByCategory, totalSpent } from '@/utils/budget-engine';
-import { Link } from 'expo-router';
+import { Link, useRouter } from 'expo-router';
 import React, { useMemo } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function DashboardScreen() {
   const insets = useSafeAreaInsets();
+  const router = useRouter();
   const expenses = useExpenseStore((s) => s.expenses);
   const { monthlyBudget, categories, userName, financialPersonality } = useBudgetStore();
 
@@ -111,6 +112,13 @@ export default function DashboardScreen() {
               </Link>
             ) : null}
           </View>
+          {/* Wrapped button */}
+          <Pressable
+            style={styles.wrappedBtn}
+            onPress={() => router.push('/wrapped' as any)}
+          >
+            <Text style={styles.wrappedBtnText}>✦ WRAPPED</Text>
+          </Pressable>
         </View>
 
         {/* Budget Summary */}
@@ -234,5 +242,20 @@ const styles = StyleSheet.create({
     color: Colors.textMuted,
     textAlign: 'center',
     paddingVertical: Spacing.xl,
+  },
+  wrappedBtn: {
+    backgroundColor: Colors.accent,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
+    borderRadius: 999,
+    borderWidth: 3,
+    borderColor: Colors.black,
+    alignSelf: 'flex-start',
+  },
+  wrappedBtnText: {
+    fontFamily: Fonts.display,
+    fontSize: FontSizes.sm,
+    color: Colors.white,
+    letterSpacing: 2,
   },
 });

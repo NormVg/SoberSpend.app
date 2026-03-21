@@ -1,15 +1,17 @@
 import { NeoButton } from '@/components/ui/neo-button';
 import { NeoCard } from '@/components/ui/neo-card';
+import { API_BASE_URL } from '@/constants/api';
 import { Borders, Colors, Fonts, FontSizes, Radii, Spacing } from '@/constants/theme';
+import { useAuthStore } from '@/store/auth-store';
 import { useBudgetStore } from '@/store/budget-store';
 import { useExpenseStore } from '@/store/expense-store';
 import { parseUPIString, upiToPendingTransaction } from '@/utils/upi-parser';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
-import { Car, Circle, CircleEllipsis, Film, QrCode, ScanLine, ShoppingBag, Utensils, Zap } from 'lucide-react-native';
-import React, { useEffect, useState } from 'react';
-import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Camera as CameraIcon, Car, Circle, CircleEllipsis, Film, QrCode, ScanLine, ShoppingBag, Utensils, Zap } from 'lucide-react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { ActivityIndicator, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const iconMap: Record<string, any> = {
@@ -26,6 +28,8 @@ export default function ScanScreen() {
   const [permission, requestPermission] = useCameraPermissions();
   const [scanned, setScanned] = useState(false);
   const [isScannerOpen, setIsScannerOpen] = useState(true);
+  const [isUploading, setIsUploading] = useState(false);
+  const cameraRef = useRef<CameraView>(null);
 
   const [merchant, setMerchant] = useState('');
   const [amount, setAmount] = useState('');
@@ -77,6 +81,61 @@ export default function ScanScreen() {
     });
   };
 
+  const scanReceipt = async () => {
+    if (!cameraRef.current || isUploading) return;
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+
+    try {
+      setIsUploading(true);
+      const photo = await cameraRef.current.takePictureAsync({ quality: 0.5 });
+      if (!photo) throw new Error('Failed to capture photo');
+
+      const userId = useAuthStore.getState().user?.id;
+      if (!userId) throw new Error('Not logged in');
+
+      const formData = new FormData();
+      formData.append('user_id', userId);
+      formData.append('file', {
+        uri: Platform.OS === 'ios' ? photo.uri.replace('file://', '') : photo.uri,
+        name: 'receipt.jpg',
+        type: 'image/jpeg',
+      } as any);
+
+      const response = await fetch(`${API_BASE_URL}/api/analyze-receipt`, {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          // Note: FormData sets its own Content-Type boundary!
+        },
+        body: formData,
+      });
+
+      const resText = await response.text();
+      let result;
+      try { result = JSON.parse(resText); } catch { throw new Error('Invalid JSON: ' + resText); }
+
+      if (response.ok && result.status === 'success') {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        setPending({
+          merchant: 'Scanned Receipt',
+          amount: result.data.total_spent,
+          category: result.data.category,
+          budgetStatus: result.data.budget_status,
+          aiRoast: result.data.ai_roast, // The Ollama roast!
+        });
+        router.push('/decision');
+      } else {
+        throw new Error(result.message || 'Unknown error');
+      }
+    } catch (err: any) {
+      console.warn('AI Analysis failed:', err);
+      alert('Analysis failed: ' + (err.message || 'Unknown error'));
+      setScanned(false);
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
   // --------------------------------------------------------------------------
   // CAMERA VIEW
   // --------------------------------------------------------------------------
@@ -94,15 +153,16 @@ export default function ScanScreen() {
     return (
       <View style={styles.container}>
         <CameraView
+          ref={cameraRef}
           style={StyleSheet.absoluteFillObject}
           facing="back"
-          onBarcodeScanned={scanned ? undefined : handleBarcodeScanned}
+          onBarcodeScanned={scanned || isUploading ? undefined : handleBarcodeScanned}
           barcodeScannerSettings={{
             barcodeTypes: ['qr'],
           }}
         >
           <View style={[styles.overlayTop, { paddingTop: insets.top + Spacing.md }]}>
-            <Text style={styles.scanInstruction}>Scan UPI QR Code</Text>
+            <Text style={styles.scanInstruction}>Scan Receipt / QR</Text>
             <NeoButton
               title="Manual Entry"
               variant="outline"
@@ -119,11 +179,22 @@ export default function ScanScreen() {
           </View>
 
           <View style={styles.overlayBottom}>
-            <NeoButton
-              title="Simulate Test QR"
-              variant="primary"
-              onPress={handleSimulate}
-            />
+            {isUploading ? (
+              <NeoCard color={Colors.surface} style={{ padding: Spacing.xl, alignItems: 'center' }}>
+                <ActivityIndicator size="large" color={Colors.accent} />
+                <Text style={[styles.title, { marginTop: Spacing.md }]}>AI IS JUDGING...</Text>
+                <Text style={styles.inputLabel}>Analyzing receipt and finding bad habits.</Text>
+              </NeoCard>
+            ) : (
+              <NeoButton
+                title="SNAP RECEIPT"
+                variant="primary"
+                size="lg"
+                icon={<CameraIcon size={24} color={Colors.bg} />}
+                onPress={scanReceipt}
+                style={{ paddingHorizontal: 40 }}
+              />
+            )}
           </View>
         </CameraView>
       </View>

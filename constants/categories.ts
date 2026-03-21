@@ -5,7 +5,7 @@ export const CATEGORIES: Category[] = [
   {
     id: 'food',
     name: 'Food',
-    budgetLimit: 8000,
+    budgetLimit: 0,
     color: Colors.mint,
     icon: 'utensils',
     keywords: ['zomato', 'swiggy', 'restaurant', 'cafe', 'food', 'pizza', 'burger', 'dominos', 'mcdonalds', 'kfc', 'starbucks', 'chai', 'biryani', 'grocery', 'bakery'],
@@ -13,7 +13,7 @@ export const CATEGORIES: Category[] = [
   {
     id: 'travel',
     name: 'Travel',
-    budgetLimit: 5000,
+    budgetLimit: 0,
     color: Colors.yellow,
     icon: 'car',
     keywords: ['uber', 'ola', 'rapido', 'metro', 'bus', 'train', 'irctc', 'petrol', 'fuel', 'parking', 'taxi'],
@@ -21,7 +21,7 @@ export const CATEGORIES: Category[] = [
   {
     id: 'shopping',
     name: 'Shopping',
-    budgetLimit: 6000,
+    budgetLimit: 0,
     color: Colors.purple,
     icon: 'shopping-bag',
     keywords: ['amazon', 'flipkart', 'myntra', 'ajio', 'nykaa', 'mall', 'store', 'shop', 'market'],
@@ -29,7 +29,7 @@ export const CATEGORIES: Category[] = [
   {
     id: 'entertainment',
     name: 'Entertainment',
-    budgetLimit: 3000,
+    budgetLimit: 0,
     color: Colors.orange,
     icon: 'film',
     keywords: ['netflix', 'spotify', 'movie', 'cinema', 'pvr', 'inox', 'game', 'gaming', 'youtube'],
@@ -37,7 +37,7 @@ export const CATEGORIES: Category[] = [
   {
     id: 'bills',
     name: 'Bills',
-    budgetLimit: 5000,
+    budgetLimit: 0,
     color: Colors.blue,
     icon: 'zap',
     keywords: ['electricity', 'water', 'internet', 'wifi', 'jio', 'airtel', 'vi', 'recharge', 'rent', 'emi'],
@@ -45,7 +45,7 @@ export const CATEGORIES: Category[] = [
   {
     id: 'other',
     name: 'Other',
-    budgetLimit: 3000,
+    budgetLimit: 0,
     color: Colors.pink,
     icon: 'circle-ellipsis',
     keywords: [],

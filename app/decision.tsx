@@ -1,7 +1,10 @@
 import { BudgetImpact } from '@/components/decision/budget-impact';
 import { WarningBanner } from '@/components/decision/warning-banner';
 import { NeoButton } from '@/components/ui/neo-button';
+import { NeoCard } from '@/components/ui/neo-card';
 import { Colors, Fonts, FontSizes, Radii, Spacing } from '@/constants/theme';
+import { supabase } from '@/lib/supabase';
+import { useAuthStore } from '@/store/auth-store';
 import { useBudgetStore } from '@/store/budget-store';
 import { useExpenseStore } from '@/store/expense-store';
 import { currentMonthExpenses } from '@/utils/budget-engine';
@@ -9,7 +12,7 @@ import { evaluateTransaction } from '@/utils/decision-engine';
 import { formatCurrency } from '@/utils/format';
 import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
-import { AlertTriangle, Car, CheckCircle, CircleEllipsis, Film, ShoppingBag, Target, Utensils, Zap } from 'lucide-react-native';
+import { AlertTriangle, Car, CheckCircle, CircleEllipsis, Film, ShoppingBag, Sparkles, Target, Utensils, Zap } from 'lucide-react-native';
 import React, { useState } from 'react';
 import { Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -55,7 +58,7 @@ export default function DecisionScreen() {
     monthlyBudget
   );
 
-  const handlePay = () => {
+  const handlePay = async () => {
     if (isUnknown) return; // force category pick first
     Haptics.notificationAsync(
       decision.warningLevel === 'exceeded'
@@ -63,7 +66,21 @@ export default function DecisionScreen() {
         : Haptics.NotificationFeedbackType.Success
     );
 
-    // Update pending with the overridden category before confirming
+    // Write to Supabase ONLY if not already saved by backend AI
+    // (We will remove the backend save, so we write everything from client)
+    const { user } = useAuthStore.getState();
+    if (user && pendingTransaction) {
+      // Background save to Supabase
+      supabase.from('Transactions').insert({
+        user_id: user.id,
+        amount: pendingTransaction.amount,
+        category: overrideCategoryId || pendingTransaction.category,
+      }).then(({ error }) => {
+        if (error) console.error('Failed to sync TX to Supabase', error);
+      });
+    }
+
+    // Update pending with the overridden category before confirming locally
     if (overrideCategoryId) {
       setPending({ ...pendingTransaction, category: overrideCategoryId });
     }
@@ -103,6 +120,21 @@ export default function DecisionScreen() {
             <Text style={styles.note}>{pendingTransaction.note}</Text>
           )}
         </View>
+
+        {/* AI Roast Card */}
+        {pendingTransaction.aiRoast && (
+          <NeoCard color={Colors.surface} style={{ marginBottom: Spacing.xl, borderColor: '#FF1A1A', borderWidth: 3 }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: Spacing.sm, gap: Spacing.sm }}>
+              <Sparkles size={18} color="#FF1A1A" strokeWidth={2.5} />
+              <Text style={{ fontFamily: Fonts.display, fontSize: FontSizes.sm, color: '#FF1A1A', letterSpacing: 2 }}>
+                OLLAMA VERDICT
+              </Text>
+            </View>
+            <Text style={{ fontFamily: Fonts.display, fontSize: FontSizes.lg, color: Colors.white, lineHeight: 28 }}>
+              "{pendingTransaction.aiRoast}"
+            </Text>
+          </NeoCard>
+        )}
 
         {/* Category picker — always visible, pre-selected if known */}
         <View style={styles.categorySection}>

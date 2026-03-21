@@ -5,12 +5,14 @@ import { SavingsGoalCard } from '@/components/insights/savings-goal-card';
 import { SpendingTrendsCard } from '@/components/insights/spending-trends-card';
 import { WarningBanner } from '@/components/insights/warning-banner';
 import { Colors, Fonts, FontSizes, Spacing } from '@/constants/theme';
+import { useRouter } from 'expo-router';
 import React from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function InsightsScreen() {
   const insets = useSafeAreaInsets();
+  const router = useRouter();
 
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
@@ -23,6 +25,12 @@ export default function InsightsScreen() {
           <Text style={styles.headerTitle}>
             Sober.<Text style={{ color: '#00FFFF' }}>Insights</Text>
           </Text>
+          <Pressable
+            onPress={() => router.push('/wrapped' as any)}
+            style={styles.wrappedBtn}
+          >
+            <Text style={styles.wrappedBtnText}>✦ WRAPPED</Text>
+          </Pressable>
         </View>
 
         <WarningBanner message="YOU'VE SPENT 30% MORE ON FOOD THIS WEEK COMPARED TO LAST." />
@@ -93,5 +101,19 @@ const styles = StyleSheet.create({
     fontStyle: 'italic',
     marginTop: Spacing.lg,
     marginBottom: Spacing.md,
+  },
+  wrappedBtn: {
+    backgroundColor: Colors.accent,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
+    borderRadius: 999,
+    borderWidth: 3,
+    borderColor: Colors.black,
+  },
+  wrappedBtnText: {
+    fontFamily: Fonts.display,
+    fontSize: FontSizes.sm,
+    color: Colors.white,
+    letterSpacing: 2,
   },
 });

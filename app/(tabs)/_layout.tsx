@@ -1,10 +1,12 @@
 import { Borders, Colors, Radii, Spacing } from '@/constants/theme';
 import { useBudgetStore } from '@/store/budget-store';
+import { useExpenseStore } from '@/store/expense-store';
+import { useWishlistStore } from '@/store/wishlist-store';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import * as Haptics from 'expo-haptics';
 import { Redirect, usePathname, useRouter, withLayoutContext } from 'expo-router';
 import { BarChart3, Heart, Home, ScanLine } from 'lucide-react-native';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -84,6 +86,13 @@ const MaterialTopTabs = withLayoutContext(Navigator);
 
 export default function TabLayout() {
   const hasCompletedOnboarding = useBudgetStore((s) => s.hasCompletedOnboarding);
+
+  useEffect(() => {
+    if (hasCompletedOnboarding) {
+      useExpenseStore.getState().initialize();
+      useWishlistStore.getState().initialize();
+    }
+  }, [hasCompletedOnboarding]);
 
   if (!hasCompletedOnboarding) {
     return <Redirect href={"/onboarding" as any} />;

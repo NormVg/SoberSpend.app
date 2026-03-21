@@ -1,3 +1,5 @@
+import { supabase } from '@/lib/supabase';
+import { useAuthStore } from '@/store/auth-store';
 import type { Expense, PendingTransaction } from '@/types';
 import { generateId } from '@/utils/format';
 import { create } from 'zustand';
@@ -11,34 +13,47 @@ interface ExpenseState {
   setPendingTransaction: (tx: PendingTransaction | null) => void;
   confirmPendingTransaction: () => void;
   clearAll: () => void;
+  initialize: () => Promise<void>;
 }
 
 export const useExpenseStore = create<ExpenseState>((set, get) => ({
   expenses: [],
   pendingTransaction: null,
 
-  addExpense: (expense) => {
-    const newExpense: Expense = {
-      ...expense,
-      id: generateId(),
-      date: new Date().toISOString(),
-    };
-    set((state) => ({
-      expenses: [newExpense, ...state.expenses],
-    }));
+  addExpense: async (expense) => {
+    const id = generateId();
+    const date = new Date().toISOString();
+    const newExpense: Expense = { ...expense, id, date };
+
+    set((state) => ({ expenses: [newExpense, ...state.expenses] }));
+
+    const user = useAuthStore.getState().user;
+    if (user) {
+      await supabase.from('Transactions').insert({
+        id,
+        user_id: user.id,
+        amount: expense.amount,
+        category: expense.category,
+        merchant: expense.merchant,
+        note: expense.note,
+        timestamp: date,
+      });
+    }
   },
 
-  removeExpense: (id) => {
+  removeExpense: async (id) => {
     set((state) => ({
       expenses: state.expenses.filter((e) => e.id !== id),
     }));
+
+    await supabase.from('Transactions').delete().eq('id', id);
   },
 
   setPendingTransaction: (tx) => {
     set({ pendingTransaction: tx });
   },
 
-  confirmPendingTransaction: () => {
+  confirmPendingTransaction: async () => {
     const { pendingTransaction } = get();
     if (!pendingTransaction) return;
 
@@ -55,9 +70,45 @@ export const useExpenseStore = create<ExpenseState>((set, get) => ({
       expenses: [newExpense, ...state.expenses],
       pendingTransaction: null,
     }));
+
+    const user = useAuthStore.getState().user;
+    if (user) {
+      await supabase.from('Transactions').insert({
+        id: newExpense.id,
+        user_id: user.id,
+        amount: newExpense.amount,
+        category: newExpense.category,
+        merchant: newExpense.merchant,
+        note: newExpense.note,
+        timestamp: newExpense.date,
+      });
+    }
   },
 
   clearAll: () => {
     set({ expenses: [], pendingTransaction: null });
+  },
+
+  initialize: async () => {
+    const user = useAuthStore.getState().user;
+    if (!user) return;
+
+    const { data } = await supabase
+      .from('Transactions')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('timestamp', { ascending: false });
+
+    if (data) {
+      const expenses: Expense[] = data.map((row) => ({
+        id: row.id,
+        amount: row.amount,
+        category: row.category,
+        merchant: row.merchant,
+        note: row.note || undefined,
+        date: row.timestamp,
+      }));
+      set({ expenses });
+    }
   },
 }));

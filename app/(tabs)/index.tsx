@@ -7,6 +7,7 @@ import { useBudgetStore } from '@/store/budget-store';
 import { useExpenseStore } from '@/store/expense-store';
 import { currentMonthExpenses, spentByCategory, totalSpent } from '@/utils/budget-engine';
 import { Link, useRouter } from 'expo-router';
+import { Settings } from 'lucide-react-native';
 import React, { useMemo } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -112,12 +113,12 @@ export default function DashboardScreen() {
               </Link>
             ) : null}
           </View>
-          {/* Wrapped button */}
+          {/* Settings icon */}
           <Pressable
-            style={styles.wrappedBtn}
-            onPress={() => router.push('/wrapped' as any)}
+            onPress={() => router.push('/config' as any)}
+            style={styles.settingsBtn}
           >
-            <Text style={styles.wrappedBtnText}>✦ WRAPPED</Text>
+            <Settings size={22} color={Colors.white} strokeWidth={2.5} />
           </Pressable>
         </View>
 
@@ -251,6 +252,16 @@ const styles = StyleSheet.create({
     borderWidth: 3,
     borderColor: Colors.black,
     alignSelf: 'flex-start',
+  },
+  settingsBtn: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    borderWidth: 2.5,
+    borderColor: Colors.border,
+    backgroundColor: Colors.surface,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   wrappedBtnText: {
     fontFamily: Fonts.display,

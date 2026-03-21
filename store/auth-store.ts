@@ -45,9 +45,13 @@ export const useAuthStore = create<AuthState>((set) => ({
         .single();
 
       if (!error && data) {
-        useBudgetStore.getState().setOnboardingData({
+        const budgetStore = useBudgetStore.getState();
+
+        // Hydrate all profile fields
+        budgetStore.setOnboardingData({
           userName: data.name || '',
           monthlyBudget: data.monthly_budget ? Number(data.monthly_budget) : 30000,
+          monthlySavingsTarget: data.monthly_savings_target ? Number(data.monthly_savings_target) : 5000,
           financialPersonality: data.financial_personality || 'Balanced',
           spendingWeakness: data.spending_weakness || [],
           primaryGoal: data.primary_goal || '',
@@ -56,16 +60,41 @@ export const useAuthStore = create<AuthState>((set) => ({
           savingsRate: data.savings_rate || '',
           hasCompletedOnboarding: true,
         });
+
+        // Hydrate category per-category budget limits from JSON blob
+        if (data.category_limits && typeof data.category_limits === 'object') {
+          budgetStore.setCategoriesData(data.category_limits as Record<string, number>);
+        }
+
+        return true;
       }
+
+      // If we failed to fetch the user (they don't exist in the DB), force onboarding
+      useBudgetStore.getState().setOnboardingData({ hasCompletedOnboarding: false } as any);
+      return false;
     };
 
-    if (session?.user) {
-      await fetchAndHydrateProfile(session.user.id);
+    let activeUser = session?.user ?? null;
+    let activeSession = session;
+
+    if (session) {
+      // Actively verify against the server rather than trusting local storage purely
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+
+      if (userError || !user) {
+        await supabase.auth.signOut();
+        useBudgetStore.getState().setOnboardingData({ hasCompletedOnboarding: false } as any);
+        activeUser = null;
+        activeSession = null;
+      } else {
+        activeUser = user;
+        await fetchAndHydrateProfile(user.id);
+      }
     }
 
     set({
-      session,
-      user: session?.user ?? null,
+      session: activeSession,
+      user: activeUser,
       isInitialized: true,
       isLoading: false
     });

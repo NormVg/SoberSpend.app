@@ -50,4 +50,6 @@ export interface PendingTransaction {
   amount: number;
   category: string;
   note?: string;
+  aiRoast?: string;
+  budgetStatus?: string;
 }

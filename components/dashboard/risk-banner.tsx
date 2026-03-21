@@ -1,22 +1,35 @@
 import { NeoCard } from '@/components/ui/neo-card';
 import { Colors, Fonts, FontSizes, Spacing } from '@/constants/theme';
-import { TriangleAlert } from 'lucide-react-native';
+import { Coffee, Eye, ShieldAlert, ShieldCheck, Siren, Skull, TriangleAlert } from 'lucide-react-native';
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
+export type RiskLevel = 'BROKE' | 'DANGER' | 'WASTED' | 'WARNING' | 'SUS' | 'SAFE' | 'CHILL';
+
 interface RiskBannerProps {
-  riskLevel: 'WARNING' | 'SAFE' | 'DANGER';
+  riskLevel: RiskLevel;
   message: string;
   highlightedWord?: string;
 }
 
+const riskConfig: Record<RiskLevel, { icon: any, color: string }> = {
+  BROKE: { icon: Skull, color: Colors.accent },
+  DANGER: { icon: Siren, color: Colors.accent },
+  WASTED: { icon: ShieldAlert, color: Colors.pink },
+  WARNING: { icon: TriangleAlert, color: Colors.orange },
+  SUS: { icon: Eye, color: Colors.yellow },
+  SAFE: { icon: ShieldCheck, color: Colors.safe },
+  CHILL: { icon: Coffee, color: Colors.mint },
+};
+
 export function RiskBanner({ riskLevel, message, highlightedWord }: RiskBannerProps) {
   const parts = highlightedWord ? message.split(highlightedWord) : [message];
+  const { icon: Icon, color } = riskConfig[riskLevel] || riskConfig.SAFE;
 
   return (
-    <NeoCard style={styles.cardWrapper} color={Colors.accent} offset={true}>
+    <NeoCard style={styles.cardWrapper} color={color} offset={true}>
       <View style={styles.contentPad}>
-        <TriangleAlert size={48} color={Colors.black} strokeWidth={3} style={styles.icon} />
+        <Icon size={48} color={Colors.black} strokeWidth={3} style={styles.icon} />
 
         <Text style={styles.riskLabel}>RISK LEVEL</Text>
         <Text style={styles.riskLevelText}>{riskLevel}</Text>

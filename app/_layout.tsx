@@ -1,5 +1,5 @@
 import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
+import { Stack, useRouter, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useRef, useState } from 'react';
@@ -7,6 +7,7 @@ import { Animated, Easing, StyleSheet } from 'react-native';
 import 'react-native-reanimated';
 
 import { Fonts } from '@/constants/theme';
+import { useAuthStore } from '@/store/auth-store';
 
 export const unstable_settings = {
   anchor: '(tabs)',
@@ -26,11 +27,33 @@ export default function RootLayout() {
   const logoScale = useRef(new Animated.Value(1)).current;
   const overlayOpacity = useRef(new Animated.Value(1)).current;
 
+  const { isInitialized, session } = useAuthStore();
+  const segments = useSegments();
+  const router = useRouter();
+
   useEffect(() => {
-    if (fontsLoaded) {
+    useAuthStore.getState().initialize();
+  }, []);
+
+  useEffect(() => {
+    if (fontsLoaded && isInitialized) {
       setIsAppReady(true);
     }
-  }, [fontsLoaded]);
+  }, [fontsLoaded, isInitialized]);
+
+  useEffect(() => {
+    if (!isInitialized || !isAppReady) return;
+
+    const inAuthGroup = segments[0] === 'login' || segments[0] === 'signup';
+
+    if (!session && !inAuthGroup) {
+      // Redirect unauthenticated users to login
+      router.replace('/login');
+    } else if (session && inAuthGroup) {
+      // Redirect authenticated users away from auth screens
+      router.replace('/(tabs)');
+    }
+  }, [session, isInitialized, isAppReady, segments]);
 
   useEffect(() => {
     if (!isAppReady) {
@@ -83,7 +106,7 @@ export default function RootLayout() {
     };
   }, [isAppReady, logoScale, overlayOpacity]);
 
-  if (!fontsLoaded) {
+  if (!fontsLoaded || !isInitialized) {
     return null;
   }
 

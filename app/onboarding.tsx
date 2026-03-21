@@ -1,5 +1,7 @@
 import { NeoButton } from '@/components/ui/neo-button';
+import { apiFetch } from '@/constants/api';
 import { Borders, Colors, Fonts, FontSizes, Radii, Spacing } from '@/constants/theme';
+import { useAuthStore } from '@/store/auth-store';
 import { useBudgetStore } from '@/store/budget-store';
 import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
@@ -55,6 +57,8 @@ export default function OnboardingScreen() {
     if (spndPts >= 5) personality = 'Spender';
     else if (spndPts <= 1) personality = 'Saver';
 
+    const user_id = useAuthStore.getState().user?.id;
+
     const bg = parseFloat(budgetStr) || 30000;
     setMonthlyBudget(bg);
 
@@ -68,6 +72,19 @@ export default function OnboardingScreen() {
       financialPersonality: personality,
       hasCompletedOnboarding: true,
     });
+
+    // Fire off context to backend
+    if (user_id) {
+      const prompt = `User ${name.trim() || 'Stranger'} is a "${personality}". Goal: ${goal}. Weaknesses: ${weaknesses.join(', ')}. Weekend vibe: ${weekendVibe}. Regrets purchases: ${purchaseRegret}. Saves: ${savingsRate}. Budget: ${bg}.`;
+
+      apiFetch('/api/onboarding', {
+        method: 'POST',
+        body: JSON.stringify({
+          user_id,
+          bad_habits_prompt: prompt,
+        }),
+      }).catch(err => console.warn('Failed to sync context to backend:', err));
+    }
 
     router.replace('/(tabs)');
   };

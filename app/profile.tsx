@@ -1,6 +1,7 @@
 import { NeoButton } from '@/components/ui/neo-button';
 import { NeoCard } from '@/components/ui/neo-card';
 import { Borders, Colors, Fonts, FontSizes, Radii, Spacing } from '@/constants/theme';
+import { useAuthStore } from '@/store/auth-store';
 import { useBudgetStore } from '@/store/budget-store';
 import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
@@ -8,6 +9,7 @@ import {
   ArrowLeft,
   Calendar,
   Flame,
+  LogOut,
   RefreshCw,
   Scale,
   Settings,
@@ -42,10 +44,18 @@ export default function ProfileScreen() {
     setOnboardingData,
   } = useBudgetStore();
 
+  const { user, signOut } = useAuthStore();
+
   const handleRetakeTest = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     setOnboardingData({ hasCompletedOnboarding: false });
     router.replace('/onboarding' as any);
+  };
+
+  const handleSignOut = async () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+    await signOut();
+    router.replace('/login');
   };
 
   const weaknesses = spendingWeakness || [];
@@ -83,6 +93,7 @@ export default function ProfileScreen() {
             <persona.icon size={40} color={Colors.black} strokeWidth={2.5} />
           </View>
           <Text style={styles.heroName}>{userName || 'Stranger'}</Text>
+          {user?.email && <Text style={styles.heroEmail}>{user.email}</Text>}
           <View style={[styles.personaPill, { backgroundColor: persona.color }]}>
             <Text style={styles.personaPillText}>THE {(financialPersonality || 'unknown').toUpperCase()}</Text>
           </View>
@@ -145,6 +156,15 @@ export default function ProfileScreen() {
           size="lg"
           icon={<RefreshCw size={20} color={Colors.white} />}
           onPress={handleRetakeTest}
+          style={{ marginBottom: Spacing.md }}
+        />
+
+        <NeoButton
+          title="Sign Out"
+          variant="danger"
+          size="lg"
+          icon={<LogOut size={20} color={Colors.white} />}
+          onPress={handleSignOut}
         />
 
         <View style={{ height: 80 }} />
@@ -208,6 +228,13 @@ const styles = StyleSheet.create({
     color: Colors.white,
     textTransform: 'uppercase',
     textAlign: 'center',
+  },
+  heroEmail: {
+    fontFamily: Fonts.display,
+    fontSize: FontSizes.md,
+    color: Colors.textMuted,
+    textAlign: 'center',
+    marginTop: -Spacing.xs,
   },
   personaPill: {
     paddingHorizontal: Spacing.xl,

@@ -3,7 +3,13 @@ import { Colors, Fonts, FontSizes, Radii, Spacing } from '@/constants/theme';
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
+import { useExpenseStore } from '@/store/expense-store';
+import { getCriticalWindow } from '@/utils/insights-engine';
+
 export function CriticalWindowCard() {
+  const expenses = useExpenseStore(s => s.expenses);
+  const window = getCriticalWindow(expenses);
+
   return (
     <NeoCard style={styles.card} color="#00FFFF" offset={true}>
       <View style={styles.badgeContainer}>
@@ -13,9 +19,9 @@ export function CriticalWindowCard() {
       </View>
 
       <Text style={styles.title}>PEAK SPEND TIME:</Text>
-      <Text style={styles.time}>8PM</Text>
+      <Text style={styles.time}>{window.time}</Text>
 
-      <Text style={styles.subtitle}>IMPULSE BUYS ARE 3X MORE LIKELY NOW.</Text>
+      <Text style={styles.subtitle}>{window.subtitle}</Text>
     </NeoCard>
   );
 }

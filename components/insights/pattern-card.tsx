@@ -3,20 +3,24 @@ import { Colors, Fonts, FontSizes, Radii, Spacing } from '@/constants/theme';
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
+import { useExpenseStore } from '@/store/expense-store';
+import { getPattern } from '@/utils/insights-engine';
+
 export function PatternCard() {
-  const bars = [10, 15, 20, 15, 70, 80, 65]; // Mon - Sun
+  const expenses = useExpenseStore(s => s.expenses);
+  const pattern = getPattern(expenses);
 
   return (
-    <NeoCard style={styles.card} color="#FF85A2" offset={true}>
+    <NeoCard style={styles.card} color={pattern.color} offset={true}>
       <View style={styles.badge}>
-        <Text style={styles.badgeText}>PATTERN DETECTED</Text>
+        <Text style={styles.badgeText}>{pattern.badge}</Text>
       </View>
 
-      <Text style={styles.title}>WEEKEND OVERSPENDER</Text>
-      <Text style={styles.description}>Your spending spikes 240% every Friday after 6PM.</Text>
+      <Text style={styles.title}>{pattern.title}</Text>
+      <Text style={styles.description}>{pattern.description}</Text>
 
       <View style={styles.chart}>
-        {bars.map((height, i) => (
+        {pattern.bars.map((height, i) => (
           <View
             key={i}
             style={[

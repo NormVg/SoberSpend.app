@@ -3,14 +3,12 @@ import { Colors, Fonts, Radii, Spacing } from '@/constants/theme';
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
+import { useExpenseStore } from '@/store/expense-store';
+import { getSpendingTrends } from '@/utils/insights-engine';
+
 export function SpendingTrendsCard() {
-  const bars = [
-    { label: 'MON', height: 40, color: '#00FFFF' },
-    { label: 'TUE', height: 70, color: '#DFFF00' },
-    { label: 'WED', height: 50, color: '#00FFFF' },
-    { label: 'THU', height: 90, color: '#FF85A2' },
-    { label: 'FRI', height: 60, color: '#DFFF00' },
-  ];
+  const expenses = useExpenseStore(s => s.expenses);
+  const bars = getSpendingTrends(expenses);
 
   return (
     <NeoCard style={styles.card} color="#1A1A1A" offset={false}>

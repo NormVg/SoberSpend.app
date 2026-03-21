@@ -95,6 +95,14 @@ export default function WishlistScreen() {
       </ScrollView>
 
       {/* Floating Add Button */}
+      {/* FAB Shadow */}
+      <View
+        style={[
+          styles.fab,
+          { backgroundColor: Colors.white, right: Spacing.xl - 6, bottom: insets.bottom + 100 - 6, elevation: 0 },
+        ]}
+      />
+      {/* FAB Main */}
       <Pressable
         style={[styles.fab, { bottom: insets.bottom + 100 }]}
         onPress={() => {
@@ -102,7 +110,7 @@ export default function WishlistScreen() {
           router.push('/add-goal');
         }}
       >
-        <Plus size={28} color={Colors.black} strokeWidth={3} />
+        <Plus size={32} color={Colors.black} strokeWidth={2.5} />
       </Pressable>
     </View>
   );
@@ -169,10 +177,5 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderWidth: 3,
     borderColor: Colors.black,
-    shadowColor: Colors.black,
-    shadowOffset: { width: 4, height: 4 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
-    elevation: 8,
   },
 });

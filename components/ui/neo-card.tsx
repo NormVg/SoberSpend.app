@@ -6,6 +6,7 @@ interface NeoCardProps {
   children: React.ReactNode;
   color?: string;
   borderColor?: string;
+  shadowColor?: string;
   style?: ViewStyle;
   offset?: boolean;
 }
@@ -13,13 +14,21 @@ interface NeoCardProps {
 /**
  * Neo-brutalist card with thick border, solid fill, and optional offset shadow.
  */
-export function NeoCard({ children, color, borderColor, style, offset = false }: NeoCardProps) {
+export function NeoCard({ children, color, borderColor, shadowColor, style, offset = false }: NeoCardProps) {
   const bgColor = color || Colors.surface;
   const border = borderColor || (color ? Colors.black : Colors.border);
   const textOnLight = color && color !== Colors.surface;
 
   return (
-    <View style={[styles.wrapper, style, offset && styles.shadow]}>
+    <View style={[styles.wrapper, style]}>
+      {offset && (
+        <View
+          style={[
+            styles.solidShadow,
+            { backgroundColor: shadowColor || Colors.white, borderRadius: style?.borderRadius || Radii.md },
+          ]}
+        />
+      )}
       <View
         style={[
           styles.card,
@@ -45,11 +54,13 @@ const styles = StyleSheet.create({
     padding: Spacing.md,
     overflow: 'hidden',
   },
-  shadow: {
-    shadowColor: Colors.black,
-    shadowOffset: { width: 4, height: 4 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
-    elevation: 6,
+  solidShadow: {
+    position: 'absolute',
+    top: 6,
+    left: 6,
+    right: -6,
+    bottom: -6,
+    borderWidth: Borders.medium,
+    borderColor: Colors.black,
   },
 });

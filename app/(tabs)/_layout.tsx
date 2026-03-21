@@ -1,4 +1,4 @@
-import { Borders, Colors, Spacing } from '@/constants/theme';
+import { Borders, Colors, Radii, Spacing } from '@/constants/theme';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import * as Haptics from 'expo-haptics';
 import { usePathname, useRouter, withLayoutContext } from 'expo-router';
@@ -26,46 +26,52 @@ function CustomTabBar() {
   };
 
   return (
-    <View style={[styles.tabBarContainer, { paddingBottom: Math.max(insets.bottom, Spacing.lg) }]}>
-      <View style={styles.tabBarInner}>
-        {/* Left: Insights */}
-        <Pressable
-          style={styles.tabItem}
-          onPress={() => handlePress('/insights')}
-        >
-          <BarChart3
-            size={32}
-            color={isInsights ? Colors.accent : Colors.textMuted}
-            strokeWidth={isInsights ? 3 : 2}
-          />
-        </Pressable>
+    <View style={[styles.floatingWrapper, { paddingBottom: Math.max(insets.bottom, Spacing.lg) }]}>
+      <View style={{ width: '100%', height: 72 }}>
+        <View style={styles.tabBarShadow} />
+        <View style={styles.tabBarInner}>
+          {/* Left: Insights */}
+          <Pressable
+            style={styles.tabItem}
+            onPress={() => handlePress('/insights')}
+          >
+            <BarChart3
+              size={32}
+              color={isInsights ? Colors.accent : Colors.textMuted}
+              strokeWidth={isInsights ? 3 : 2}
+            />
+          </Pressable>
 
-        {/* Center: Dynamic (Scan QR or Home) */}
-        <Pressable
-          style={styles.centerButton}
-          onPress={() => {
-            if (isHome) handlePress('/scan');
-            else handlePress('/');
-          }}
-        >
-          {isHome ? (
-            <ScanLine size={32} color={Colors.black} strokeWidth={3} />
-          ) : (
-            <Home size={32} color={Colors.black} strokeWidth={3} />
-          )}
-        </Pressable>
+          {/* Center: Dynamic (Scan QR or Home) */}
+          <View style={styles.centerButtonWrapper}>
+            <View style={styles.centerButtonShadow} />
+            <Pressable
+              style={styles.centerButton}
+              onPress={() => {
+                if (isHome) handlePress('/scan');
+                else handlePress('/');
+              }}
+            >
+              {isHome ? (
+                <ScanLine size={32} color={Colors.black} strokeWidth={3} />
+              ) : (
+                <Home size={32} color={Colors.black} strokeWidth={3} />
+              )}
+            </Pressable>
+          </View>
 
-        {/* Right: Wishlist */}
-        <Pressable
-          style={styles.tabItem}
-          onPress={() => handlePress('/wishlist')}
-        >
-          <Heart
-            size={32}
-            color={isWishlist ? Colors.accent : Colors.textMuted}
-            strokeWidth={isWishlist ? 3 : 2}
-          />
-        </Pressable>
+          {/* Right: Wishlist */}
+          <Pressable
+            style={styles.tabItem}
+            onPress={() => handlePress('/wishlist')}
+          >
+            <Heart
+              size={32}
+              color={isWishlist ? Colors.accent : Colors.textMuted}
+              strokeWidth={isWishlist ? 3 : 2}
+            />
+          </Pressable>
+        </View>
       </View>
     </View>
   );
@@ -93,6 +99,14 @@ export default function TabLayout() {
 }
 
 const styles = StyleSheet.create({
+  floatingWrapper: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    alignItems: 'center',
+    paddingHorizontal: Spacing.xl,
+  },
   tabBarContainer: {
     position: 'absolute',
     bottom: 0,
@@ -106,37 +120,52 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     backgroundColor: Colors.surface,
-    borderRadius: 50,
+    borderRadius: Radii.pill,
     borderWidth: Borders.thick,
     borderColor: Colors.black,
-    paddingHorizontal: Spacing.xl,
+    paddingHorizontal: Spacing.md,
     paddingVertical: 12,
     height: 72,
     width: '100%',
-    shadowColor: Colors.black,
-    shadowOffset: { width: 4, height: 4 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
-    elevation: 8,
+  },
+  tabBarShadow: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: Colors.white,
+    top: 4,
+    left: 4,
+    borderRadius: Radii.pill,
+    borderWidth: Borders.thick,
+    borderColor: Colors.black,
   },
   tabItem: {
     alignItems: 'center',
     justifyContent: 'center',
     flex: 1,
   },
+  centerButtonWrapper: {
+    width: 60,
+    height: 60,
+    transform: [{ translateY: -18 }],
+  },
   centerButton: {
-    width: 68,
-    height: 68,
-    borderRadius: 34,
-    backgroundColor: Colors.accent,
-    borderWidth: Borders.thick,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: '#FF85A2',
+    borderWidth: 3,
     borderColor: Colors.black,
     alignItems: 'center',
     justifyContent: 'center',
-    transform: [{ translateY: -18 }],
-    shadowColor: Colors.black,
-    shadowOffset: { width: 4, height: 4 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
+  },
+  centerButtonShadow: {
+    position: 'absolute',
+    top: 3,
+    left: 3,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: Colors.white,
+    borderWidth: 3,
+    borderColor: Colors.black,
   }
 });

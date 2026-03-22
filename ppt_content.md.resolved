@@ -1,0 +1,92 @@
+# SoberSpend — HS 4.0 PPT Content Guide
+
+---
+
+## Slide 1 — Cover
+
+- **[Team name]:** Team SoberSpend
+- **[Problem Statement Title]:** SoberSpend — Stop Spending Like You're Rich
+
+---
+
+## Slide 2 — Proposed Solution
+
+> Brief 1–2 line description of your solution
+
+SoberSpend is an AI-powered personal finance app that intercepts your UPI payments in real-time, analyzes your spending patterns, and roasts you into making smarter financial decisions — **before you pay, not after.**
+
+---
+
+## Slide 3 — Technical Approach
+
+> Technologies used
+
+- **Frontend:** React Native (Expo) · TypeScript
+- **State Management:** Zustand
+- **Backend:** Nuxt.js (API server)
+- **Database & Auth:** Supabase (PostgreSQL)
+- **AI:** Google Gemini AI — receipt parsing & AI budget advisor
+- **Device Features:** Expo Camera (QR scanning) · UPI Deep-link integration
+
+---
+
+## Slide 4 — Methodology
+
+> Flow / Prototype
+
+**User Flow:**
+
+1. User scans a QR code or receipt
+2. AI extracts merchant, amount & category
+3. Decision Engine calculates a **Risk Level**: `BROKE → DANGER → WASTED → WARNING → SUS → SAFE → CHILL`
+4. Risk banner shown with roast message
+5. User confirms or cancels the payment
+6. Transaction saved to Supabase
+7. Insights page updates: Spending Trends · Pattern Detection · Savings Goals
+
+**Flowchart (add as image/diagram):**
+```
+Scan QR / Receipt
+      ↓
+AI Parses Data (Gemini)
+      ↓
+Decision Engine → Risk Score
+      ↓
+Risk Banner + Roast Message
+      ↓
+User Pays via UPI Deep-link
+      ↓
+Data saved to Supabase
+      ↓
+Insights Page Updates
+```
+
+---
+
+## Slide 5 — Feasibility & Viability
+
+**Feasibility:**
+- Fully functional working prototype on a production-grade stack
+- Supabase handles real authentication + database
+- Gemini AI is live and integrated for receipt analysis
+- UPI deep-linking works on Android
+
+**Potential Challenges:**
+- UPI ecosystem fragmentation across different apps
+- AI misclassifying handwritten or unclear receipts
+- Getting users to trust the app before payment is made
+
+**Strategies to Overcome:**
+- Multi-app UPI deep-link support for major apps (GPay, PhonePe, Paytm)
+- Manual entry fallback when AI scanning fails
+- Gamified "roast" system builds habit loop and trust over time
+
+---
+
+## Slide 6 — Conclusion / References
+
+- **GitHub (App):** github.com/NormVg/SoberSpend.app
+- **GitHub (Backend):** SoberSpend.backend repo
+- **Stack:** Expo · Nuxt.js · Supabase · Google Gemini
+- **Category:** FinTech / AI
+- **Key Differentiator:** Intervenes at the point of payment — not just tracking after the damage is done

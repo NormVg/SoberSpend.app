@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "Sober.Spend",
-    "slug": "Sober.Spend",
+    "slug": "sober-spend",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/ss-logo.png",

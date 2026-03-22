@@ -104,5 +104,5 @@ Scan the QR code with the Expo Go app on your physical device, or press `a` to r
 
 ---
 <div align="center">
-  <p>Built with ❤️ by <b>Team SoberSpend</b> for the <b>HS 4.0 Hackathon</b>.</p>
+  <p>Built with ❤️❤️ by <b>Team SoberSpend</b> for the <b>HS 4.0 Hackathon</b>.</p>
 </div>

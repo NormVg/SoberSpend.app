@@ -27,7 +27,7 @@ export default function DecisionScreen() {
   const confirmPending = useExpenseStore((s) => s.confirmPendingTransaction);
   const setPending = useExpenseStore((s) => s.setPendingTransaction);
   const expenses = useExpenseStore((s) => s.expenses);
-  const { monthlyBudget, categories, isDemoMode } = useBudgetStore();
+  const { monthlyBudget, categories } = useBudgetStore();
 
   // Allow overriding category when auto-detect returns 'other'
   const [overrideCategoryId, setOverrideCategoryId] = useState<string | null>(null);
@@ -72,7 +72,7 @@ export default function DecisionScreen() {
     // confirmPending handles BOTH local state and the full Supabase write
     await confirmPending();
 
-    if (!isDemoMode && pendingTransaction) {
+    if (pendingTransaction) {
       const upiUrl = `upi://pay?pa=merchant@upi&pn=${encodeURIComponent(pendingTransaction.merchant)}&am=${pendingTransaction.amount}&tn=${encodeURIComponent(pendingTransaction.note || pendingTransaction.merchant)}`;
       Linking.openURL(upiUrl).catch(() => { });
     }

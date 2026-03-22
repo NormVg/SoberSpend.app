@@ -8,7 +8,6 @@ interface BudgetState {
   monthlyBudget: number;
   monthlySavingsTarget: number;
   categories: Category[];
-  isDemoMode: boolean;
 
   hasCompletedOnboarding: boolean;
   userName: string;
@@ -25,14 +24,12 @@ interface BudgetState {
   setCategoriesData: (limitsMap: Record<string, number>) => void;
   setOnboardingData: (data: Partial<Pick<BudgetState, 'userName' | 'financialPersonality' | 'spendingWeakness' | 'hasCompletedOnboarding' | 'primaryGoal' | 'weekendVibe' | 'purchaseRegret' | 'savingsRate' | 'monthlyBudget' | 'monthlySavingsTarget'>>) => void;
   getCategoryById: (id: string) => Category | undefined;
-  toggleDemoMode: () => void;
 }
 
 export const useBudgetStore = create<BudgetState>((set, get) => ({
   monthlyBudget: DEFAULT_MONTHLY_BUDGET,
   monthlySavingsTarget: 5000, // default ₹5,000/month
   categories: CATEGORIES,
-  isDemoMode: true,
   hasCompletedOnboarding: false,
   userName: '',
   financialPersonality: null,
@@ -87,9 +84,5 @@ export const useBudgetStore = create<BudgetState>((set, get) => ({
 
   getCategoryById: (id) => {
     return get().categories.find((c) => c.id === id);
-  },
-
-  toggleDemoMode: () => {
-    set((state) => ({ isDemoMode: !state.isDemoMode }));
   },
 }));

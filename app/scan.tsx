@@ -47,7 +47,6 @@ export default function ScanScreen() {
     setScanned(true);
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
 
-    const isDemoMode = useBudgetStore.getState().isDemoMode;
     const upiData = parseUPIString(data);
 
     if (upiData) {

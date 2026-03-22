@@ -7,7 +7,7 @@ import { useBudgetStore } from '@/store/budget-store';
 import { useRouter } from 'expo-router';
 import { ArrowLeft, Car, Circle, CircleEllipsis, Film, Save, ShoppingBag, Sparkles, Utensils, Zap } from 'lucide-react-native';
 import React, { useState } from 'react';
-import { ActivityIndicator, Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Switch, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const iconMap: Record<string, any> = {
@@ -23,7 +23,7 @@ export default function ConfigScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
 
-  const { monthlyBudget, monthlySavingsTarget, categories, setMonthlyBudget, setMonthlySavingsTarget, setCategoryLimit, isDemoMode, toggleDemoMode } = useBudgetStore();
+  const { monthlyBudget, monthlySavingsTarget, categories, setMonthlyBudget, setMonthlySavingsTarget, setCategoryLimit } = useBudgetStore();
   const user = useAuthStore((s) => s.user);
 
   const [budgetInput, setBudgetInput] = useState(monthlyBudget.toString());
@@ -251,26 +251,6 @@ export default function ConfigScreen() {
             }
           </View>
         </Pressable>
-
-        {/* Demo Mode — Developer Section at the bottom */}
-        <Text style={[styles.sectionTitle, { marginTop: Spacing.xl }]}>DEVELOPER</Text>
-        <NeoCard style={{ marginBottom: Spacing.md }} color={Colors.surface}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-            <View style={{ flex: 1, marginRight: Spacing.md }}>
-              <Text style={[styles.label, { marginBottom: 0, color: Colors.white }]}>Demo Mode</Text>
-              <Text style={{ fontFamily: Fonts.display, fontSize: FontSizes.sm, color: Colors.textMuted, marginTop: 4 }}>
-                Toggle sample data for testing
-              </Text>
-            </View>
-            <Switch
-              value={isDemoMode}
-              onValueChange={toggleDemoMode}
-              trackColor={{ false: Colors.border, true: Colors.accent }}
-              thumbColor={Colors.white}
-            />
-          </View>
-        </NeoCard>
-
       </ScrollView>
     </KeyboardAvoidingView>
   );

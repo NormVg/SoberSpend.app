@@ -8,7 +8,7 @@
   <p>
     <a href="https://youtu.be/dQw4w9WgXcQ"><strong>🎥 Watch Demo Video</strong></a> ·
     <a href="https://github.com/NormVg/SoberSpend.backend/raw/feat/nuxt-migration-with-ai-sdk/public/SpendSober.pptx"><strong>📊 Download Pitch Deck</strong></a> ·
-    <a href="https://github.com/NormVg/SoberSpend.backend/raw/feat/nuxt-migration-with-ai-sdk/public/sober.spend.apk"><strong>📱 Download APK</strong></a> ·
+    <a href="https://github.com/NormVg/SoberSpend.app/releases/download/sddd/application-346b777e-dd3c-422f-8fdd-f31c31da1f6c.apk"><strong>📱 Download APK</strong></a> ·
     <a href="https://github.com/NormVg/SoberSpend.backend"><strong>⚙️ View Backend Repo</strong></a>
   </p>
 </div>

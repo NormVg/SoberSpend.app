@@ -6,11 +6,27 @@
   <p>An intelligent UPI payment interceptor that forces you to confront your financial reality <em>before</em> you tap pay.</p>
 
   <p>
-    <a href="https://youtu.be/drfokWK9iyQ"><strong>🎥 Watch Demo Video</strong></a> ·
     <a href="https://github.com/NormVg/SoberSpend.backend/raw/feat/nuxt-migration-with-ai-sdk/public/SpendSober.pptx"><strong>📊 Download Pitch Deck</strong></a> ·
     <a href="https://github.com/NormVg/SoberSpend.app/releases/download/sddd/application-346b777e-dd3c-422f-8fdd-f31c31da1f6c.apk"><strong>📱 Download APK</strong></a> ·
+    <a href="https://sober-spend.vercel.app/"><strong>🌐 Try Web App</strong></a> ·
     <a href="https://github.com/NormVg/SoberSpend.backend"><strong>⚙️ View Backend Repo</strong></a>
   </p>
+</div>
+
+<div align="center">
+  <a href="https://youtu.be/drfokWK9iyQ">
+    <img src="https://img.youtube.com/vi/drfokWK9iyQ/maxresdefault.jpg" alt="Watch Demo Video" width="800" />
+  </a>
+</div>
+
+<div align="center">
+  <img src="./show/screen-6.jpg" width="220" />
+  &nbsp;
+  <img src="./show/screen-4.jpg" width="220" />
+  &nbsp;
+  <img src="./show/screen-7.jpg" width="220" />
+  <br/>
+  <em>SoberSpend live in action.</em>
 </div>
 
 ---

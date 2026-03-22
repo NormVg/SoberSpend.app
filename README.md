@@ -7,7 +7,7 @@
 
   <p>
     <a href="https://youtu.be/dQw4w9WgXcQ"><strong>🎥 Watch Demo Video</strong></a> ·
-    <a href="https://github.com/NormVg/SoberSpend.backend/raw/feat/nuxt-migration-with-ai-sdk/public/SoberSpend-Presentation.pptx"><strong>📊 Download Pitch Deck</strong></a> ·
+    <a href="https://github.com/NormVg/SoberSpend.backend/raw/feat/nuxt-migration-with-ai-sdk/public/SpendSober.pptx"><strong>📊 Download Pitch Deck</strong></a> ·
     <a href="https://github.com/NormVg/SoberSpend.backend"><strong>⚙️ View Backend Repo</strong></a>
   </p>
 </div>

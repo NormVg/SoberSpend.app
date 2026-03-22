@@ -13,12 +13,18 @@
   </p>
 </div>
 
+<br/>
+
+## 🎥 Watch It In Action
 <div align="center">
   <a href="https://youtu.be/drfokWK9iyQ">
     <img src="https://img.youtube.com/vi/drfokWK9iyQ/maxresdefault.jpg" alt="Watch Demo Video" width="800" />
   </a>
 </div>
 
+<br/>
+
+## 📱 App Showcase
 <div align="center">
   <img src="./show/screen-6.jpg" width="220" />
   &nbsp;

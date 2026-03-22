@@ -13,9 +13,8 @@
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#C54770",
-        "foregroundImage": "./assets/images/ss-logo.png",
-        "monochromeImage": "./assets/images/ss-logo.png"
+        "backgroundColor": "#0A0A0A",
+        "foregroundImage": "./assets/images/ss-logo.png"
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false
